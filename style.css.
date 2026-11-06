@@ -619,3 +619,48 @@ footer {
     transition-duration: .01ms !important;
   }
 }
+.roblox-avatar-frame {
+  position: relative;
+  width: min(78vw, 380px);
+  aspect-ratio: 1;
+  margin: 45px auto 20px;
+  padding: 12px;
+  border-radius: 48% 48% 42% 42%;
+  background: linear-gradient(
+    145deg,
+    #fff8ff,
+    #ffb8df,
+    #d7c4ff,
+    #fff0fa
+  );
+  box-shadow:
+    0 0 35px #ffb5df99,
+    0 0 90px #c6a1ff66,
+    inset 0 0 15px white;
+  animation: avatarFloat 4s ease-in-out infinite;
+}
+
+.roblox-avatar-frame::before {
+  content: "♡";
+  position: absolute;
+  top: -35px;
+  right: -15px;
+  z-index: 2;
+  color: #fff0fa;
+  font-size: 65px;
+  text-shadow: 0 0 20px #ff8acb;
+}
+
+.roblox-avatar-frame img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  border-radius: inherit;
+  background: #f8c9e8;
+}
+
+@keyframes avatarFloat {
+  0%, 100% { transform: translateY(0) rotate(-1deg); }
+  50% { transform: translateY(-12px) rotate(1deg); }
+}
