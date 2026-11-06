@@ -1,0 +1,309 @@
+
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+
+:root {
+  --pink: #ff8bd1;
+  --purple: #b99aff;
+  --white: #fff4ff;
+  --bg: #10091e;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  min-height: 100vh;
+  overflow-x: hidden;
+  background: var(--bg);
+  color: var(--white);
+  font-family: 'Manrope', sans-serif;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  background:
+    radial-gradient(ellipse at 20% 20%, #743c83 0%, transparent 40%),
+    radial-gradient(ellipse at 80% 70%, #492b86 0%, transparent 45%),
+    linear-gradient(135deg, #160b29, #090713 70%);
+}
+
+.stars {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 5;
+  background-image:
+    radial-gradient(2px 2px at 20% 30%, white 99%, transparent),
+    radial-gradient(2px 2px at 70% 60%, #ffc5f0 99%, transparent),
+    radial-gradient(1px 1px at 40% 80%, white 99%, transparent),
+    radial-gradient(2px 2px at 90% 20%, #d9baff 99%, transparent);
+  background-size: 250px 250px;
+  animation: starsMove 35s linear infinite;
+  opacity: .7;
+}
+
+@keyframes starsMove {
+  to { background-position: 250px 500px; }
+}
+
+.cursor-glow {
+  position: fixed;
+  width: 280px;
+  height: 280px;
+  border-radius: 50%;
+  background: #ff8bd1;
+  filter: blur(130px);
+  opacity: .13;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.welcome {
+  min-height: 100svh;
+  position: relative;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.welcome::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(transparent, #10091e 100%);
+  z-index: -1;
+}
+
+.portal {
+  position: absolute;
+  width: min(75vw, 650px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  border: 1px solid #ffb7ed70;
+  box-shadow:
+    0 0 50px #d65bff50,
+    inset 0 0 80px #f56bff35;
+  animation: portal 9s ease-in-out infinite;
+}
+
+.portal::before,
+.portal::after {
+  content: "";
+  position: absolute;
+  inset: 8%;
+  border: 2px solid #d5a3ff70;
+  border-radius: 50%;
+  animation: spin 18s linear infinite;
+}
+
+.portal::after {
+  inset: 18%;
+  border-color: #ff9cdb80;
+  animation-direction: reverse;
+  animation-duration: 13s;
+}
+
+@keyframes portal {
+  50% {
+    transform: scale(1.08);
+    filter: hue-rotate(35deg);
+  }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.welcome-content {
+  text-align: center;
+  z-index: 2;
+  padding: 24px;
+  animation: appear 1.5s ease both;
+}
+
+@keyframes appear {
+  from { opacity: 0; transform: translateY(35px) scale(.9); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.eyebrow {
+  font-size: 10px;
+  letter-spacing: 5px;
+  color: #e8b8ff;
+  font-weight: 800;
+}
+
+h1 {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: clamp(65px, 13vw, 145px);
+  letter-spacing: -9px;
+  line-height: 1.1;
+  margin: 20px 0;
+  background: linear-gradient(110deg, #fff, #ff9bd8, #c5a2ff, #fff);
+  background-size: 250%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: shine 5s linear infinite;
+  filter: drop-shadow(0 0 35px #e88bff65);
+}
+
+h1 span {
+  color: #ff9bd8;
+}
+
+@keyframes shine {
+  to { background-position: 250% center; }
+}
+
+.welcome-content > p {
+  color: #d4b9dd;
+  font-size: 13px;
+  letter-spacing: 2px;
+}
+
+.enter {
+  margin-top: 42px;
+  padding: 17px 30px;
+  border: 1px solid #ffffff65;
+  border-radius: 50px;
+  background: linear-gradient(110deg, #ff9bd8, #b995ff);
+  color: #24102f;
+  font-weight: 800;
+  font-size: 11px;
+  letter-spacing: 2px;
+  box-shadow: 0 0 35px #e77bff70;
+  cursor: pointer;
+  transition: .4s;
+}
+
+.enter:hover {
+  transform: scale(1.08);
+  box-shadow: 0 0 70px #ff8bd1;
+}
+
+.tiny-cat {
+  margin-top: 45px;
+  font-size: 28px;
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+  50% { transform: translateY(-13px) rotate(8deg); }
+}
+
+.world {
+  min-height: 100vh;
+  padding: 30px 7%;
+  position: relative;
+  background:
+    radial-gradient(ellipse at 50% 40%, #48265b70, transparent 60%);
+}
+
+nav {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  letter-spacing: 3px;
+  color: #d7b5ed;
+  border-bottom: 1px solid #ffffff20;
+  padding-bottom: 25px;
+}
+
+.hero {
+  min-height: 80vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  text-align: center;
+}
+
+.avatar-frame {
+  width: 210px;
+  height: 250px;
+  border-radius: 110px;
+  padding: 5px;
+  background: linear-gradient(135deg, #ff9bd8, #a78aff, #fff);
+  box-shadow: 0 0 70px #d67cff65;
+  margin-bottom: 40px;
+  animation: float 4s ease-in-out infinite;
+}
+
+.avatar-placeholder {
+  height: 100%;
+  width: 100%;
+  border-radius: inherit;
+  background: linear-gradient(145deg, #3c1b4d, #180d2b);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+  color: #f8c9ef;
+  font-size: 10px;
+  letter-spacing: 2px;
+}
+
+.avatar-placeholder span {
+  font-size: 65px;
+}
+
+h2 {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: clamp(35px, 7vw, 75px);
+  margin: 15px 0;
+  background: linear-gradient(90deg, #fff, #ff9bd8, #c2a0ff);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.hero > p {
+  color: #d0b6dc;
+  margin-bottom: 35px;
+}
+
+.hero a {
+  color: white;
+  text-decoration: none;
+  font-size: 11px;
+  letter-spacing: 2px;
+  padding: 17px 25px;
+  border: 1px solid #ffb8e477;
+  border-radius: 50px;
+  background: #ffffff0b;
+  backdrop-filter: blur(15px);
+  transition: .3s;
+}
+
+.hero a:hover {
+  background: #ff9bd8;
+  color: #25102e;
+  box-shadow: 0 0 35px #ff9bd8;
+}
+
+footer {
+  text-align: center;
+  padding: 30px;
+  font-size: 9px;
+  letter-spacing: 4px;
+  color: #b99acb;
+}
+
+@media (max-width: 600px) {
+  nav { font-size: 8px; letter-spacing: 1px; }
+  .portal { width: 95vw; }
+  h1 { letter-spacing: -5px; }
+}
