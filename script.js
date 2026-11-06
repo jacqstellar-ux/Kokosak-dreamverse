@@ -2,328 +2,233 @@
 import * as THREE from "three";
 
 // ========================================
-// KOKOSAK DREAMVERSE — WORLD ENGINE
+// KOKOSAK DREAMVERSE — OPTIMIZED ENGINE
 // ========================================
 
-const $ = (selector) => document.querySelector(selector);
+const entrance = document.getElementById("entrance");
+const dreamverse = document.getElementById("dreamverse");
+const enterButton = document.getElementById("enter-world");
+const transition = document.getElementById("transition");
+const loader = document.getElementById("loader");
 
-const loader = $("#loader");
-const entrance = $("#entrance");
-const dreamverse = $("#dreamverse");
-const enterButton = $("#enter-world");
-const transition = $("#transition-overlay");
-
-let activeWorld = 1;
-let transitionRunning = false;
-
-const worlds = [];
-const clock = new THREE.Clock();
+let worldOne = null;
+let worldTwo = null;
+let activeWorld = null;
+let animationFrame = null;
+let entered = false;
 
 // ========================================
-// WORLD CREATION
+// 3D WORLD CREATOR
 // ========================================
 
-function createWorld(canvasId, type) {
-  const canvas = document.getElementById(canvasId);
-  if (!canvas) return null;
+function createWorld(elementId, worldType = 1) {
+  const container = document.getElementById(elementId);
+  if (!container) return null;
 
   const scene = new THREE.Scene();
 
   const camera = new THREE.PerspectiveCamera(
-    48,
-    window.innerWidth / window.innerHeight,
+    45,
+    container.clientWidth / Math.max(container.clientHeight, 1),
     0.1,
     100
   );
 
-  camera.position.set(0, 3, 13);
+  camera.position.set(0, 0, 11);
 
-  let renderer;
-
-  try {
-    renderer = new THREE.WebGLRenderer({
-      canvas,
-      alpha: true,
-      antialias: true,
-      powerPreference: "low-power"
-    });
-  } catch (error) {
-    console.warn("3D graphics unavailable:", error);
-    return null;
-  }
+  const renderer = new THREE.WebGLRenderer({
+    alpha: true,
+    antialias: false,
+    powerPreference: "low-power"
+  });
 
   renderer.setPixelRatio(
-    Math.min(window.devicePixelRatio || 1, 1.5)
+    Math.min(window.devicePixelRatio || 1, 1.25)
   );
 
-  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setSize(
+    container.clientWidth || window.innerWidth,
+    container.clientHeight || window.innerHeight
+  );
+
   renderer.outputColorSpace = THREE.SRGBColorSpace;
-  renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.25;
 
-  // LIGHTING
+  container.appendChild(renderer.domElement);
 
+  const group = new THREE.Group();
+  scene.add(group);
+
+  // Lighting
   scene.add(new THREE.AmbientLight(0xffffff, 2));
 
-  const pinkLight = new THREE.PointLight(0xff8ecb, 100, 40);
-  pinkLight.position.set(-5, 5, 5);
+  const mainLight = new THREE.PointLight(0xffd8ef, 30);
+  mainLight.position.set(3, 5, 7);
+  scene.add(mainLight);
+
+  const pinkLight = new THREE.PointLight(0xffa9dc, 20);
+  pinkLight.position.set(-5, -2, 4);
   scene.add(pinkLight);
 
-  const purpleLight = new THREE.PointLight(0xb59aff, 90, 40);
-  purpleLight.position.set(5, 3, -5);
-  scene.add(purpleLight);
+  // Floating islands
+  const islandGeometry = new THREE.IcosahedronGeometry(1, 1);
 
-  const whiteLight = new THREE.DirectionalLight(0xffffff, 2);
-  whiteLight.position.set(2, 8, 5);
-  scene.add(whiteLight);
-
-  const objects = [];
-
-  const pinkMaterial = new THREE.MeshStandardMaterial({
-    color: 0xffa9d9,
-    roughness: 0.3
+  const islandMaterial = new THREE.MeshStandardMaterial({
+    color: worldType === 1 ? 0xf6c8e5 : 0xe8c8ff,
+    roughness: 0.65,
+    metalness: 0.05,
+    flatShading: true
   });
 
-  const purpleMaterial = new THREE.MeshStandardMaterial({
-    color: 0xc7aaff,
-    roughness: 0.32
-  });
+  const islands = [];
 
-  const whiteMaterial = new THREE.MeshStandardMaterial({
-    color: 0xfff7ff,
-    roughness: 0.2
-  });
-
-  // FLOATING ISLANDS
-
-  function createIsland(x, y, z, scale) {
-    const group = new THREE.Group();
-
-    const top = new THREE.Mesh(
-      new THREE.CylinderGeometry(2.1, 1.7, 0.55, 8),
-      pinkMaterial
+  for (let i = 0; i < 7; i++) {
+    const island = new THREE.Mesh(
+      islandGeometry,
+      islandMaterial
     );
 
-    group.add(top);
+    const scale = 0.35 + Math.random() * 0.65;
 
-    const bottom = new THREE.Mesh(
-      new THREE.ConeGeometry(1.65, 2.2, 8),
-      purpleMaterial
+    island.scale.set(
+      scale * 1.5,
+      scale * 0.55,
+      scale
     );
 
-    bottom.position.y = -1.2;
-    bottom.rotation.y = Math.PI / 8;
-    group.add(bottom);
+    island.position.set(
+      (Math.random() - 0.5) * 15,
+      (Math.random() - 0.5) * 9,
+      -2 - Math.random() * 5
+    );
 
+    group.add(island);
+
+    islands.push({
+      mesh: island,
+      speed: 0.3 + Math.random() * 0.5,
+      offset: Math.random() * 10
+    });
+  }
+
+  // Floating crystals
+  const crystals = [];
+  const crystalGeometry = new THREE.OctahedronGeometry(0.22, 0);
+
+  const crystalMaterial = new THREE.MeshStandardMaterial({
+    color: 0xffd9f2,
+    emissive: 0xff9edc,
+    emissiveIntensity: 0.4,
+    roughness: 0.25,
+    metalness: 0.25
+  });
+
+  for (let i = 0; i < 14; i++) {
     const crystal = new THREE.Mesh(
-      new THREE.OctahedronGeometry(0.42),
-      whiteMaterial
+      crystalGeometry,
+      crystalMaterial
     );
 
-    crystal.position.set(0.2, 0.7, 0.2);
+    crystal.position.set(
+      (Math.random() - 0.5) * 18,
+      (Math.random() - 0.5) * 11,
+      Math.random() * 2 - 4
+    );
+
+    const scale = 0.5 + Math.random() * 1.2;
+    crystal.scale.setScalar(scale);
+
     group.add(crystal);
-
-    group.position.set(x, y, z);
-    group.scale.setScalar(scale);
-    scene.add(group);
-
-    objects.push({
-      mesh: group,
-      baseY: y,
-      speed: 0.5 + Math.random()
-    });
+    crystals.push(crystal);
   }
 
-  createIsland(-5, -3, -3, 1.2);
-  createIsland(5, -2, -5, 0.9);
-  createIsland(-7, 2, -9, 0.7);
-  createIsland(7, 3, -10, 0.8);
-  createIsland(0, -5, -9, 1.3);
+  // Small stars
+  const starCount = 100;
+  const positions = new Float32Array(starCount * 3);
 
-  // DREAM CLOUDS
-
-  function createCloud(x, y, z, scale) {
-    const group = new THREE.Group();
-
-    for (let i = 0; i < 6; i++) {
-      const part = new THREE.Mesh(
-        new THREE.SphereGeometry(
-          0.65 + Math.random() * 0.35,
-          12,
-          12
-        ),
-        whiteMaterial
-      );
-
-      part.position.set(
-        (Math.random() - 0.5) * 2.2,
-        Math.random() * 0.5,
-        (Math.random() - 0.5) * 0.8
-      );
-
-      group.add(part);
-    }
-
-    group.position.set(x, y, z);
-    group.scale.setScalar(scale);
-    scene.add(group);
-
-    objects.push({
-      mesh: group,
-      baseY: y,
-      speed: 0.25 + Math.random() * 0.3,
-      cloud: true
-    });
+  for (let i = 0; i < starCount; i++) {
+    positions[i * 3] = (Math.random() - 0.5) * 24;
+    positions[i * 3 + 1] = (Math.random() - 0.5) * 16;
+    positions[i * 3 + 2] = -3 - Math.random() * 8;
   }
 
-  createCloud(-5, 1, -2, 1.4);
-  createCloud(5, -1, -4, 1.1);
-  createCloud(0, 5, -8, 1.8);
-  createCloud(-8, -2, -8, 1);
-  createCloud(8, 2, -7, 1.2);
-
-  // FLOATING CRYSTALS AND HEARTS
-
-  function createDecoration(x, y, z, type) {
-    const geometry = type === "heart"
-      ? new THREE.TorusGeometry(0.42, 0.12, 12, 32)
-      : new THREE.OctahedronGeometry(0.35);
-
-    const material = new THREE.MeshStandardMaterial({
-      color: type === "heart" ? 0xff8dc9 : 0xe4c8ff,
-      emissive: type === "heart" ? 0xff4fa9 : 0x9b6bff,
-      emissiveIntensity: 0.45,
-      roughness: 0.2
-    });
-
-    const mesh = new THREE.Mesh(geometry, material);
-    mesh.position.set(x, y, z);
-    scene.add(mesh);
-
-    objects.push({
-      mesh,
-      baseY: y,
-      speed: 0.8 + Math.random()
-    });
-  }
-
-  for (let i = 0; i < 22; i++) {
-    createDecoration(
-      (Math.random() - 0.5) * 19,
-      (Math.random() - 0.5) * 12,
-      -Math.random() * 13,
-      i % 2 === 0 ? "heart" : "crystal"
-    );
-  }
-
-  // STAR PARTICLES
-
-  const count = 450;
-  const positions = new Float32Array(count * 3);
-
-  for (let i = 0; i < count; i++) {
-    positions[i * 3] = (Math.random() - 0.5) * 28;
-    positions[i * 3 + 1] = (Math.random() - 0.5) * 18;
-    positions[i * 3 + 2] = -Math.random() * 20;
-  }
-
-  const particleGeometry = new THREE.BufferGeometry();
-
-  particleGeometry.setAttribute(
+  const starGeometry = new THREE.BufferGeometry();
+  starGeometry.setAttribute(
     "position",
     new THREE.BufferAttribute(positions, 3)
   );
 
-  const starField = new THREE.Points(
-    particleGeometry,
-    new THREE.PointsMaterial({
-      color: type === 1 ? 0xffffff : 0xffa7dc,
-      size: 0.075,
-      transparent: true,
-      opacity: 0.85
-    })
+  const starMaterial = new THREE.PointsMaterial({
+    color: 0xffffff,
+    size: 0.055,
+    transparent: true,
+    opacity: 0.8
+  });
+
+  const stars = new THREE.Points(
+    starGeometry,
+    starMaterial
   );
 
-  scene.add(starField);
+  scene.add(stars);
 
   return {
     scene,
     camera,
     renderer,
-    objects,
-    starField,
-    pinkLight,
-    purpleLight,
-    type
+    group,
+    islands,
+    crystals,
+    stars,
+    clock: new THREE.Clock(),
+    container
   };
 }
 
 // ========================================
-// INITIALIZE WORLDS
+// INITIALIZE ONLY FIRST WORLD
 // ========================================
 
-const worldOne = createWorld("dream-scene", 1);
-const worldTwo = createWorld("roblox-scene", 2);
+function initializeFirstWorld() {
+  if (worldOne) return;
 
-worlds.push(worldOne, worldTwo);
+  worldOne = createWorld("dream-scene", 1);
+  activeWorld = worldOne;
+}
 
-// ========================================
-// CAMERA MOVEMENT
-// ========================================
-
-let pointerX = 0;
-let pointerY = 0;
-
-window.addEventListener("pointermove", (event) => {
-  pointerX = (event.clientX / window.innerWidth - 0.5) * 2;
-  pointerY = (event.clientY / window.innerHeight - 0.5) * 2;
-});
+initializeFirstWorld();
 
 // ========================================
-// MAIN ANIMATION
+// ANIMATION — ONLY ACTIVE WORLD
 // ========================================
 
 function animate() {
-  requestAnimationFrame(animate);
+  animationFrame = requestAnimationFrame(animate);
 
-  const elapsed = clock.getElapsedTime();
-  const delta = Math.min(clock.getDelta(), 0.04);
+  if (!activeWorld) return;
 
-  const world = activeWorld === 1 ? worldOne : worldTwo;
+  const world = activeWorld;
+  const delta = Math.min(world.clock.getDelta(), 0.04);
+  const elapsed = world.clock.elapsedTime;
 
-  if (!world) return;
+  world.group.rotation.y += delta * 0.035;
 
-  world.objects.forEach((item, index) => {
-    const mesh = item.mesh;
+  world.islands.forEach((item) => {
+    item.mesh.position.y +=
+      Math.sin(elapsed * item.speed + item.offset) *
+      delta * 0.16;
 
-    mesh.position.y =
-      item.baseY +
-      Math.sin(elapsed * item.speed + index) * 0.22;
-
-    mesh.rotation.y += delta * 0.25 * item.speed;
-
-    if (!item.cloud) {
-      mesh.rotation.z += delta * 0.15;
-    }
+    item.mesh.rotation.y += delta * 0.12;
   });
 
-  world.starField.rotation.y = elapsed * 0.008;
-  world.starField.rotation.x =
-    Math.sin(elapsed * 0.15) * 0.04;
+  world.crystals.forEach((crystal, index) => {
+    crystal.rotation.x += delta * 0.35;
+    crystal.rotation.y += delta * 0.5;
 
-  world.camera.position.x +=
-    (pointerX * 1.2 - world.camera.position.x) * 0.025;
+    crystal.position.y +=
+      Math.sin(elapsed + index) * delta * 0.12;
+  });
 
-  world.camera.position.y +=
-    (3 - pointerY * 0.65 - world.camera.position.y) * 0.025;
-
-  world.camera.position.z =
-    13 + Math.sin(elapsed * 0.2) * 0.5;
-
-  world.camera.lookAt(0, 0, -3);
-
-  world.pinkLight.position.x = Math.sin(elapsed * 0.5) * 5;
-  world.purpleLight.position.x = Math.cos(elapsed * 0.4) * 5;
+  world.stars.rotation.z = elapsed * 0.008;
 
   world.renderer.render(world.scene, world.camera);
 }
@@ -331,62 +236,98 @@ function animate() {
 animate();
 
 // ========================================
-// ENTER HER WORLD
+// ENTER DREAMVERSE
 // ========================================
 
-enterButton?.addEventListener("click", () => {
-  if (transitionRunning) return;
+if (enterButton) {
+  enterButton.addEventListener("click", () => {
+    if (entered) return;
 
-  transitionRunning = true;
-  transition?.classList.add("active");
+    entered = true;
 
-  const core = $(".portal-core");
-
-  if (core) {
-    core.style.transition = "transform 1s ease";
-    core.style.transform = "scale(12)";
-  }
-
-  setTimeout(() => {
-    entrance?.classList.add("hidden");
-    dreamverse?.classList.remove("hidden");
-
-    activeWorld = 2;
-
-    if (worldTwo) {
-      worldTwo.camera.position.set(0, 3, 13);
+    if (transition) {
+      transition.classList.add("active");
     }
 
     setTimeout(() => {
-      transition?.classList.remove("active");
-
-      if (core) {
-        core.style.transform = "scale(1)";
+      if (entrance) {
+        entrance.classList.add("hidden");
       }
 
-      transitionRunning = false;
-    }, 650);
+      if (dreamverse) {
+        dreamverse.classList.remove("hidden");
+      }
 
-  }, 1100);
+      // Create second scene ONLY now
+      if (!worldTwo) {
+        worldTwo = createWorld("roblox-scene", 2);
+      }
+
+      activeWorld = worldTwo;
+
+      if (activeWorld) {
+        activeWorld.clock.start();
+      }
+
+      if (transition) {
+        transition.classList.remove("active");
+      }
+
+      window.dispatchEvent(new Event("resize"));
+    }, 650);
+  });
+}
+
+// ========================================
+// RESPONSIVE RESIZE
+// ========================================
+
+function resizeWorld(world) {
+  if (!world) return;
+
+  const width = world.container.clientWidth || window.innerWidth;
+  const height = world.container.clientHeight || window.innerHeight;
+
+  world.camera.aspect = width / height;
+  world.camera.updateProjectionMatrix();
+
+  world.renderer.setSize(width, height, false);
+}
+
+window.addEventListener("resize", () => {
+  resizeWorld(worldOne);
+  resizeWorld(worldTwo);
 });
 
 // ========================================
-// REAL ROBLOX AVATAR
-// The official thumbnail is in index.html.
-// No fake character is generated here.
+// MOUSE / TOUCH MOVEMENT
 // ========================================
 
-const avatar = $("#roblox-avatar");
+let pointerX = 0;
+let pointerY = 0;
 
-if (avatar) {
-  avatar.addEventListener("error", () => {
-    console.warn("Official Roblox avatar image failed to load.");
-  });
-
-  avatar.addEventListener("load", () => {
-    console.log("Kokosak's real Roblox avatar loaded!");
-  });
+function movePointer(x, y) {
+  pointerX = (x / window.innerWidth - 0.5) * 0.5;
+  pointerY = (y / window.innerHeight - 0.5) * 0.35;
 }
+
+window.addEventListener("pointermove", (event) => {
+  movePointer(event.clientX, event.clientY);
+});
+
+function updateCameraMovement() {
+  if (activeWorld) {
+    activeWorld.camera.position.x +=
+      (pointerX - activeWorld.camera.position.x * 0.04) * 0.025;
+
+    activeWorld.camera.position.y +=
+      (-pointerY - activeWorld.camera.position.y * 0.04) * 0.025;
+  }
+
+  requestAnimationFrame(updateCameraMovement);
+}
+
+updateCameraMovement();
 
 // ========================================
 // LOADER
@@ -394,30 +335,8 @@ if (avatar) {
 
 window.addEventListener("load", () => {
   setTimeout(() => {
-    loader?.classList.add("loaded");
-  }, 1000);
-});
-
-// ========================================
-// RESPONSIVE RESIZE
-// ========================================
-
-window.addEventListener("resize", () => {
-  worlds.forEach((world) => {
-    if (!world) return;
-
-    world.camera.aspect =
-      window.innerWidth / window.innerHeight;
-
-    world.camera.updateProjectionMatrix();
-
-    world.renderer.setSize(
-      window.innerWidth,
-      window.innerHeight
-    );
-
-    world.renderer.setPixelRatio(
-      Math.min(window.devicePixelRatio || 1, 1.5)
-    );
-  });
+    if (loader) {
+      loader.classList.add("loaded");
+    }
+  }, 250);
 });
