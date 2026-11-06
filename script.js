@@ -1,309 +1,410 @@
 
-(() => {
-  "use strict";
+import * as THREE from 'three';
 
-  const $ = (s) => document.querySelector(s);
+const loader = document.getElementById('loader');
+const entrance = document.getElementById('entrance');
+const dreamverse = document.getElementById('dreamverse');
+const enterButton = document.getElementById('enter-world');
 
-  const welcome = $("#welcome");
-  const world = $("#world");
-  const enter = $("#enter");
+const scene = new THREE.Scene();
+scene.background = new THREE.Color('#f9eafa');
+scene.fog = new THREE.Fog('#f9eafa', 13, 32);
 
-  if (!welcome || !world || !enter) return;
+const camera = new THREE.PerspectiveCamera(
+  38,
+  window.innerWidth / window.innerHeight,
+  0.1,
+  100
+);
+camera.position.set(0, 3.5, 12);
 
-  const style = document.createElement("style");
-  style.textContent = `
-    body { overflow-x:hidden; }
-    #world { display:none; opacity:0; }
-    #world.unlocked {
-      display:block;
-      animation: worldReveal 1.5s cubic-bezier(.16,1,.3,1) forwards;
-    }
-    @keyframes worldReveal {
-      from { opacity:0; transform:scale(1.07); filter:blur(14px); }
-      to { opacity:1; transform:scale(1); filter:blur(0); }
-    }
+const renderer = new THREE.WebGLRenderer({
+  canvas: document.getElementById('dream-scene'),
+  antialias: true,
+  alpha: true
+});
 
-    #universe-canvas {
-      position:fixed; inset:0; width:100%; height:100%;
-      pointer-events:none; z-index:6;
-    }
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.15;
 
-    .welcome-content { position:relative; z-index:8; }
-    .portal { transition:filter 1s, transform 1s; }
+scene.add(new THREE.HemisphereLight('#fff8ff', '#b99bcf', 2.1));
 
-    .cinema {
-      position:fixed; inset:0; z-index:100;
-      pointer-events:none; opacity:0;
-      background:#080511;
-      display:grid; place-items:center;
-      overflow:hidden;
-    }
-    .cinema.active {
-      opacity:1;
-      animation:cinemaIn 4.2s cubic-bezier(.7,0,.2,1) forwards;
-    }
-    @keyframes cinemaIn {
-      0% { opacity:0; }
-      12% { opacity:1; }
-      55% { opacity:1; }
-      100% { opacity:0; visibility:hidden; }
-    }
-    .cinema-word {
-      font-family:'Space Grotesk',sans-serif;
-      font-size:clamp(55px,14vw,160px);
-      font-weight:800;
-      letter-spacing:-.09em;
-      white-space:nowrap;
-      color:#fff0fb;
-      text-shadow:0 0 30px #ff78d8, 0 0 100px #b17cff;
-      transform:scale(.15) rotate(-8deg);
-      animation:wordZoom 3.5s cubic-bezier(.12,.8,.2,1) forwards;
-    }
-    @keyframes wordZoom {
-      0% { transform:scale(.15) rotate(-8deg); opacity:0; filter:blur(30px); }
-      25% { opacity:1; }
-      65% { transform:scale(1.1) rotate(2deg); filter:blur(0); }
-      100% { transform:scale(9) rotate(10deg); opacity:0; filter:blur(15px); }
-    }
+const sun = new THREE.DirectionalLight('#ffffff', 3);
+sun.position.set(5, 9, 7);
+sun.castShadow = true;
+scene.add(sun);
 
-    .cinema-flash {
-      position:absolute; inset:0;
-      background:radial-gradient(circle,#fff 0%,#f8b6f0 8%,#9c5bda 30%,transparent 70%);
-      opacity:0;
-      animation:flash 3.8s ease forwards;
-    }
-    @keyframes flash {
-      0%,55% { opacity:0; transform:scale(.1); }
-      68% { opacity:.9; transform:scale(1.8); }
-      100% { opacity:0; transform:scale(4); }
-    }
+const pinkLight = new THREE.PointLight('#ff9bd5', 35, 18);
+pinkLight.position.set(-4, 3, 3);
+scene.add(pinkLight);
 
-    .cat-runner {
-      position:fixed; z-index:30; left:-150px; bottom:12%;
-      font-size:65px; pointer-events:none;
-      filter:drop-shadow(0 0 20px #ff9ce6);
-      animation:catRun 8s ease-in-out infinite;
-    }
-    @keyframes catRun {
-      0% { transform:translateX(-150px) rotate(-8deg); }
-      40% { transform:translateX(45vw) translateY(-35px) rotate(5deg); }
-      65% { transform:translateX(75vw) translateY(0) rotate(-4deg); }
-      100% { transform:translateX(calc(100vw + 200px)) rotate(8deg); }
-    }
+const lavenderLight = new THREE.PointLight('#bcaaff', 30, 18);
+lavenderLight.position.set(4, 2, -3);
+scene.add(lavenderLight);
 
-    .secret-button {
-      margin-top:22px; border:1px solid #e9b6ff70;
-      background:#ffffff0c; color:#fce6ff;
-      padding:13px 22px; border-radius:30px;
-      font:600 10px 'Manrope',sans-serif;
-      letter-spacing:2px; cursor:pointer;
-      backdrop-filter:blur(15px); transition:.35s;
-    }
-    .secret-button:active { transform:scale(.94); }
-    .secret-button:hover { background:#ff9bd8; color:#26112d; }
+const world = new THREE.Group();
+scene.add(world);
 
-    .secret-message {
-      position:fixed; inset:0; z-index:120;
-      display:grid; place-items:center; padding:25px;
-      background:#10091eea; backdrop-filter:blur(22px);
-      opacity:0; visibility:hidden; transition:.5s;
-    }
-    .secret-message.open { opacity:1; visibility:visible; }
-    .secret-card {
-      max-width:380px; width:100%; text-align:center;
-      padding:38px 25px; border-radius:28px;
-      border:1px solid #ffc1ed70;
-      background:linear-gradient(145deg,#48264e,#201331);
-      box-shadow:0 0 90px #e77bff35;
-      transform:translateY(25px) scale(.94);
-      transition:.5s;
-    }
-    .secret-message.open .secret-card {
-      transform:translateY(0) scale(1);
-    }
-    .secret-card h3 { color:#ffb9e7; font-size:27px; margin:15px 0; }
-    .secret-card p { color:#ead2ee; line-height:1.8; font-size:13px; }
-    .secret-close {
-      margin-top:25px; padding:12px 25px;
-      border:0; border-radius:25px;
-      background:#ffaddf; color:#28122e;
-      font-weight:800; cursor:pointer;
-    }
-
-    .world nav, .hero > * {
-      animation:floatIn 1s cubic-bezier(.16,1,.3,1) both;
-    }
-    .hero > *:nth-child(2) { animation-delay:.1s; }
-    .hero > *:nth-child(3) { animation-delay:.2s; }
-    .hero > *:nth-child(4) { animation-delay:.3s; }
-    .hero > *:nth-child(5) { animation-delay:.4s; }
-    @keyframes floatIn {
-      from { opacity:0; transform:translateY(25px); }
-      to { opacity:1; transform:translateY(0); }
-    }
-
-    @media(prefers-reduced-motion:reduce) {
-      *,*::before,*::after {
-        animation-duration:.01ms !important;
-        transition-duration:.01ms !important;
-      }
-    }
-  `;
-  document.head.appendChild(style);
-
-  // PARTICLE ENGINE
-  const canvas = document.createElement("canvas");
-  canvas.id = "universe-canvas";
-  document.body.appendChild(canvas);
-
-  const ctx = canvas.getContext("2d");
-  let width, height, particles = [];
-  let pointer = { x:-1000, y:-1000 };
-  let entered = false;
-
-  function resize() {
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    width = window.innerWidth;
-    height = window.innerHeight;
-    canvas.width = width * dpr;
-    canvas.height = height * dpr;
-    canvas.style.width = width + "px";
-    canvas.style.height = height + "px";
-    ctx.setTransform(dpr,0,0,dpr,0,0);
-
-    particles = Array.from({length:Math.min(130,Math.floor(width/5))}, () => ({
-      x:Math.random()*width,
-      y:Math.random()*height,
-      r:Math.random()*1.8+.3,
-      speed:Math.random()*.35+.08,
-      phase:Math.random()*Math.PI*2,
-      hue:Math.random()>.5 ? 320 : 270
-    }));
-  }
-
-  function draw() {
-    ctx.clearRect(0,0,width,height);
-    const time = performance.now()*.001;
-
-    particles.forEach(p => {
-      p.y -= p.speed;
-      p.x += Math.sin(time+p.phase)*.18;
-      if (p.y < -5) {
-        p.y = height+5;
-        p.x = Math.random()*width;
-      }
-
-      const dx = pointer.x-p.x;
-      const dy = pointer.y-p.y;
-      const distance = Math.sqrt(dx*dx+dy*dy);
-
-      if (distance < 100 && distance > 0) {
-        p.x -= dx/distance*1.2;
-        p.y -= dy/distance*1.2;
-      }
-
-      const alpha = .3 + (Math.sin(time*2+p.phase)+1)*.3;
-      ctx.beginPath();
-      ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
-      ctx.fillStyle = `hsla(${p.hue},100%,85%,${alpha})`;
-      ctx.shadowBlur = 12;
-      ctx.shadowColor = "#e99cff";
-      ctx.fill();
-    });
-
-    ctx.shadowBlur = 0;
-    requestAnimationFrame(draw);
-  }
-
-  resize();
-  draw();
-  window.addEventListener("resize",resize);
-
-  function movePointer(x,y) {
-    pointer.x=x;
-    pointer.y=y;
-    const glow = $(".cursor-glow");
-    if (glow) {
-      glow.style.left=(x-140)+"px";
-      glow.style.top=(y-140)+"px";
-    }
-  }
-
-  window.addEventListener("pointermove",e => movePointer(e.clientX,e.clientY));
-  window.addEventListener("touchmove",e => {
-    if (e.touches[0]) movePointer(e.touches[0].clientX,e.touches[0].clientY);
-  },{passive:true});
-
-  // FLOATING CAT
-  const cat = document.createElement("div");
-  cat.className = "cat-runner";
-  cat.textContent = "🐈‍⬛";
-  document.body.appendChild(cat);
-
-  // SECRET MESSAGE
-  const secret = document.createElement("div");
-  secret.className = "secret-message";
-  secret.innerHTML = `
-    <div class="secret-card">
-      <div style="font-size:42px">୨୧ 🐈 ୨୧</div>
-      <h3>A little secret...</h3>
-      <p>This little universe is yours.<br>
-      Every star, every tiny detail,<br>
-      every little cat. ♡</p>
-      <button class="secret-close">CLOSE ♡</button>
-    </div>
-  `;
-  document.body.appendChild(secret);
-
-  function closeSecret() {
-    secret.classList.remove("open");
-  }
-  secret.querySelector(".secret-close").addEventListener("click",closeSecret);
-  secret.addEventListener("click",e => {
-    if (e.target === secret) closeSecret();
+const mat = (color, roughness = 0.65, metalness = 0) =>
+  new THREE.MeshStandardMaterial({
+    color,
+    roughness,
+    metalness
   });
 
-  const surprise = document.createElement("button");
-  surprise.className = "secret-button";
-  surprise.textContent = "✧ OPEN A LITTLE SECRET ✧";
-  $(".hero").appendChild(surprise);
-  surprise.addEventListener("click",() => secret.classList.add("open"));
+const grassMat = mat('#a8d8c2');
+const pinkMat = mat('#ffb3dc');
+const lightPinkMat = mat('#ffe2f2');
+const purpleMat = mat('#c5b0f6');
+const whiteMat = mat('#fff9ff');
+const goldMat = mat('#f5d68c', 0.3, 0.6);
 
-  // CINEMATIC ENTRY
-  enter.addEventListener("click",() => {
-    if (entered) return;
-    entered = true;
-    enter.disabled = true;
+function addMesh(geometry, material, parent, x, y, z) {
+  const mesh = new THREE.Mesh(geometry, material);
+  mesh.position.set(x, y, z);
+  mesh.castShadow = true;
+  mesh.receiveShadow = true;
+  parent.add(mesh);
+  return mesh;
+}
 
-    const cinema = document.createElement("div");
-    cinema.className = "cinema";
-    cinema.innerHTML = `
-      <div class="cinema-flash"></div>
-      <div class="cinema-word">KOKOSAK ♡</div>
-    `;
-    document.body.appendChild(cinema);
+// FLOATING ISLAND
+const island = new THREE.Group();
+world.add(island);
 
-    welcome.style.transition = "transform 2.5s cubic-bezier(.7,0,.2,1), opacity 2s";
-    welcome.style.transform = "scale(1.7)";
-    welcome.style.opacity = "0";
+const top = addMesh(
+  new THREE.CylinderGeometry(3.5, 2.7, 0.8, 9, 1),
+  grassMat,
+  island,
+  0, -0.3, 0
+);
+top.rotation.y = 0.3;
 
-    cinema.classList.add("active");
+const underside = addMesh(
+  new THREE.ConeGeometry(2.7, 2.5, 9),
+  mat('#a88acb'),
+  island,
+  0, -1.75, 0
+);
+underside.rotation.x = Math.PI;
 
-    setTimeout(() => {
-      welcome.style.display = "none";
-      world.classList.add("unlocked");
-      window.scrollTo({top:0,behavior:"instant"});
-    },3000);
+const islandRing = addMesh(
+  new THREE.TorusGeometry(3.15, 0.06, 12, 80),
+  goldMat,
+  island,
+  0, 0.05, 0
+);
+islandRing.rotation.x = Math.PI / 2;
 
-    setTimeout(() => {
-      cinema.remove();
-      canvas.style.opacity = "1";
-    },4500);
-  });
+// TINY FLOWERS
+for (let i = 0; i < 28; i++) {
+  const angle = Math.random() * Math.PI * 2;
+  const radius = 1 + Math.random() * 2.5;
+  const x = Math.cos(angle) * radius;
+  const z = Math.sin(angle) * radius;
 
-  canvas.style.transition = "opacity 1s";
-  canvas.style.opacity = "0";
+  const flower = new THREE.Group();
+  flower.position.set(x, 0.16, z);
+  island.add(flower);
+
+  addMesh(
+    new THREE.SphereGeometry(0.055, 10, 8),
+    pinkMat,
+    flower, 0, 0, 0
+  );
+
+  for (let p = 0; p < 5; p++) {
+    const a = p * Math.PI * 2 / 5;
+    addMesh(
+      new THREE.SphereGeometry(0.07, 10, 8),
+      whiteMat,
+      flower,
+      Math.cos(a) * 0.1,
+      0,
+      Math.sin(a) * 0.1
+    );
+  }
+}
+
+// DREAM PALACE
+const palace = new THREE.Group();
+palace.position.set(-1.1, 0.1, -1.1);
+island.add(palace);
+
+addMesh(
+  new THREE.BoxGeometry(1.55, 1.2, 1.3),
+  lightPinkMat,
+  palace, 0, 0.6, 0
+);
+
+addMesh(
+  new THREE.ConeGeometry(1.05, 1.35, 4),
+  purpleMat,
+  palace, 0, 1.85, 0
+).rotation.y = Math.PI / 4;
+
+for (const x of [-0.48, 0.48]) {
+  addMesh(
+    new THREE.CylinderGeometry(0.16, 0.2, 1.7, 12),
+    whiteMat,
+    palace, x, 1.15, 0
+  );
+
+  addMesh(
+    new THREE.ConeGeometry(0.25, 0.5, 12),
+    pinkMat,
+    palace, x, 2.25, 0
+  );
+}
+
+const door = addMesh(
+  new THREE.BoxGeometry(0.35, 0.65, 0.06),
+  purpleMat,
+  palace, 0, 0.35, 0.67
+);
+
+// CUSTOM 3D KITTEN
+const kitten = new THREE.Group();
+kitten.position.set(1.05, 0.2, 0.7);
+island.add(kitten);
+
+const fur = mat('#fff1e9', 0.88);
+const innerEar = mat('#ffb0d3');
+const eyeMat = mat('#503347', 0.12);
+const noseMat = mat('#ee91b8');
+const shineMat = new THREE.MeshBasicMaterial({ color: '#ffffff' });
+
+const body = addMesh(
+  new THREE.SphereGeometry(0.43, 32, 24),
+  fur,
+  kitten, 0, 0.42, 0
+);
+body.scale.set(0.9, 1.05, 0.85);
+
+const head = new THREE.Group();
+head.position.set(0, 1.05, 0.03);
+kitten.add(head);
+
+addMesh(
+  new THREE.SphereGeometry(0.62, 40, 32),
+  fur,
+  head, 0, 0, 0
+);
+
+for (const side of [-1, 1]) {
+  const ear = addMesh(
+    new THREE.ConeGeometry(0.23, 0.48, 32),
+    fur,
+    head, side * 0.39, 0.47, 0
+  );
+  ear.rotation.z = side * -0.22;
+
+  const earInside = addMesh(
+    new THREE.SphereGeometry(0.12, 24, 16),
+    innerEar,
+    head, side * 0.39, 0.45, 0.15
+  );
+  earInside.scale.set(0.85, 1.35, 0.3);
+
+  const eye = addMesh(
+    new THREE.SphereGeometry(0.105, 24, 20),
+    eyeMat,
+    head, side * 0.22, 0.03, 0.53
+  );
+  eye.scale.set(0.85, 1.15, 0.6);
+
+  addMesh(
+    new THREE.SphereGeometry(0.033, 12, 12),
+    shineMat,
+    head, side * 0.22 - 0.025, 0.075, 0.59
+  );
+
+  addMesh(
+    new THREE.SphereGeometry(0.035, 12, 12),
+    mat('#f6b3b9'),
+    head, side * 0.38, -0.17, 0.46
+  );
+
+  const paw = addMesh(
+    new THREE.SphereGeometry(0.19, 24, 16),
+    fur,
+    kitten, side * 0.29, 0.13, 0.25
+  );
+  paw.scale.set(0.8, 0.7, 1);
+}
+
+addMesh(
+  new THREE.SphereGeometry(0.065, 20, 16),
+  noseMat,
+  head, 0, -0.12, 0.57
+);
+
+// LITTLE BOW
+const bow = new THREE.Group();
+bow.position.set(0, 0.52, 0.04);
+head.add(bow);
+
+const bowMat = mat('#ff83bd', 0.3);
+
+for (const side of [-1, 1]) {
+  const loop = addMesh(
+    new THREE.SphereGeometry(0.15, 20, 16),
+    bowMat,
+    bow, side * 0.14, 0, 0
+  );
+  loop.scale.set(1.2, 0.7, 0.4);
+}
+
+addMesh(
+  new THREE.SphereGeometry(0.075, 20, 16),
+  goldMat,
+  bow, 0, 0, 0.05
+);
+
+// CURLED TAIL
+const tailCurve = new THREE.CatmullRomCurve3([
+  new THREE.Vector3(0.3, 0.3, -0.2),
+  new THREE.Vector3(0.65, 0.2, -0.3),
+  new THREE.Vector3(0.75, 0.5, -0.4),
+  new THREE.Vector3(0.55, 0.7, -0.4)
+]);
+
+const tail = addMesh(
+  new THREE.TubeGeometry(tailCurve, 32, 0.105, 12, false),
+  fur,
+  kitten, 0, 0, 0
+);
+
+// CLOUDS
+const cloudMat = mat('#ffffff');
+
+for (let i = 0; i < 12; i++) {
+  const cloud = new THREE.Group();
+  cloud.position.set(
+    (Math.random() - 0.5) * 18,
+    -1 + Math.random() * 5,
+    -4 - Math.random() * 9
+  );
+
+  const size = 0.35 + Math.random() * 0.45;
+
+  for (let j = 0; j < 5; j++) {
+    const puff = addMesh(
+      new THREE.SphereGeometry(size * (0.65 + Math.random() * 0.4), 16, 12),
+      cloudMat,
+      cloud,
+      (j - 2) * size * 0.55,
+      Math.random() * size * 0.3,
+      0
+    );
+  }
+
+  scene.add(cloud);
+}
+
+// FLOATING STARS
+const starGroup = new THREE.Group();
+scene.add(starGroup);
+
+for (let i = 0; i < 100; i++) {
+  const star = addMesh(
+    new THREE.SphereGeometry(0.025 + Math.random() * 0.035, 8, 8),
+    new THREE.MeshBasicMaterial({
+      color: Math.random() > 0.5 ? '#ffffff' : '#f6b5dc'
+    }),
+    starGroup,
+    (Math.random() - 0.5) * 24,
+    (Math.random() - 0.5) * 13,
+    -2 - Math.random() * 12
+  );
+}
+
+// ANIMATION
+const clock = new THREE.Clock();
+
+function animate() {
+  requestAnimationFrame(animate);
+
+  const t = clock.getElapsedTime();
+
+  island.position.y = Math.sin(t * 0.7) * 0.13;
+  island.rotation.y = Math.sin(t * 0.18) * 0.12;
+
+  kitten.position.y = 0.2 + Math.sin(t * 1.8) * 0.07;
+  kitten.rotation.y = Math.sin(t * 0.65) * 0.16;
+  head.rotation.z = Math.sin(t * 1.3) * 0.035;
+  bow.rotation.z = Math.sin(t * 1.8) * 0.05;
+  tail.rotation.x = Math.sin(t * 2) * 0.1;
+
+  starGroup.rotation.y = t * 0.012;
+
+  renderer.render(scene, camera);
+}
+
+animate();
+
+// TOUCH PARALLAX
+let targetX = 0;
+let targetY = 0;
+
+window.addEventListener('pointermove', (event) => {
+  targetX = (event.clientX / window.innerWidth - 0.5) * 0.7;
+  targetY = (event.clientY / window.innerHeight - 0.5) * 0.35;
+});
+
+function moveCamera() {
+  camera.position.x += (targetX - camera.position.x * 0.035) * 0.025;
+  camera.position.y += (3.5 - targetY - camera.position.y) * 0.025;
+  camera.lookAt(0, 0.2, 0);
+  requestAnimationFrame(moveCamera);
+}
+moveCamera();
+
+// RESIZE
+window.addEventListener('resize', () => {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
+});
+
+// ENTRANCE
+enterButton.addEventListener('click', () => {
+  entrance.classList.add('hidden');
+  dreamverse.classList.remove('hidden');
+  window.scrollTo(0, 0);
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
+
+// CAT CLUB
+const cats = [
+  { name: 'Mochi', mood: 'The sweetest little dreamer', art: '♡' },
+  { name: 'Peachy', mood: 'A tiny ball of sunshine', art: '✧' },
+  { name: 'Luna', mood: 'The sleepy moon princess', art: '☾' }
+];
+
+const collection = document.getElementById('cat-collection');
+
+cats.forEach(cat => {
+  const card = document.createElement('article');
+  card.className = 'cat-card';
+  card.innerHTML = `
+    <div class="cat-art">${cat.art}</div>
+    <h3>${cat.name}</h3>
+    <p>${cat.mood}</p>
+  `;
+  collection.appendChild(card);
+});
+
+// LOADER
+window.addEventListener('load', () => {
   setTimeout(() => {
-    canvas.style.opacity = "1";
-  },800);
-})();
+    loader.style.opacity = '0';
+    setTimeout(() => loader.remove(), 900);
+  }, 500);
+});
