@@ -1,49 +1,57 @@
 
 /* =====================================
    KOKOSAK DREAMVERSE
-   LIGHTWEIGHT MOBILE ENGINE
+   STABLE MOBILE VERSION
    ===================================== */
 
+const loader = document.getElementById("loader");
 const entrance = document.getElementById("entrance");
 const dreamverse = document.getElementById("dreamverse");
 const enterButton = document.getElementById("enter-world");
-const transition = document.getElementById("transition");
-const loader = document.getElementById("loader");
+const transition = document.getElementById("transition-overlay");
+const avatar = document.getElementById("roblox-avatar");
 
 let entered = false;
 
 // =====================================
-// FAST INITIALIZATION
+// INITIAL PAGE SETUP
 // =====================================
 
-document.addEventListener("DOMContentLoaded", () => {
-  if (loader) {
-    requestAnimationFrame(() => {
-      loader.classList.add("loaded");
-    });
-  }
+// Nastavení stránky hned po načtení skriptu
+if (entrance) {
+  entrance.classList.remove("hidden");
+}
 
-  if (entrance) {
-    entrance.classList.remove("hidden");
-  }
+if (dreamverse) {
+  dreamverse.classList.add("hidden");
+}
 
-  if (dreamverse) {
-    dreamverse.classList.add("hidden");
-  }
-});
+// Loader se vždy schová
+if (loader) {
+  requestAnimationFrame(() => {
+    loader.classList.add("loaded");
+  });
+
+  // Záložní pojistka
+  setTimeout(() => {
+    loader.classList.add("loaded");
+  }, 1200);
+}
 
 // =====================================
 // ROBLOX AVATAR
 // =====================================
 
-const avatar = document.getElementById("roblox-avatar");
-
 if (avatar) {
   avatar.loading = "eager";
   avatar.decoding = "async";
 
+  avatar.addEventListener("load", () => {
+    avatar.classList.add("avatar-loaded");
+  });
+
   avatar.addEventListener("error", () => {
-    console.warn("Roblox avatar could not be loaded.");
+    console.warn("Roblox avatar failed to load.");
   });
 }
 
@@ -56,12 +64,13 @@ if (enterButton) {
     if (entered) return;
 
     entered = true;
-    enterButton.style.pointerEvents = "none";
+    enterButton.disabled = true;
 
     if (transition) {
       transition.classList.add("active");
     }
 
+    // Přechod na hlavní stránku
     setTimeout(() => {
       if (entrance) {
         entrance.classList.add("hidden");
@@ -73,48 +82,77 @@ if (enterButton) {
 
       window.scrollTo({
         top: 0,
-        behavior: "instant"
+        behavior: "auto"
       });
 
+      // Dokončení přechodu
       setTimeout(() => {
         if (transition) {
           transition.classList.remove("active");
         }
-      }, 100);
+
+        enterButton.disabled = false;
+      }, 500);
 
     }, 650);
   });
 }
 
 // =====================================
-// LIGHTWEIGHT POINTER EFFECT
+// MOBILE & MOUSE MOVEMENT
 // =====================================
 
-let pointerX = 0;
-let pointerY = 0;
+let pointerFrame = null;
 
 window.addEventListener("pointermove", (event) => {
-  pointerX = event.clientX / window.innerWidth - 0.5;
-  pointerY = event.clientY / window.innerHeight - 0.5;
+  if (pointerFrame) return;
 
-  document.documentElement.style.setProperty(
-    "--pointer-x",
-    pointerX.toFixed(3)
-  );
+  pointerFrame = requestAnimationFrame(() => {
+    const x = event.clientX / window.innerWidth - 0.5;
+    const y = event.clientY / window.innerHeight - 0.5;
 
-  document.documentElement.style.setProperty(
-    "--pointer-y",
-    pointerY.toFixed(3)
-  );
+    document.documentElement.style.setProperty(
+      "--pointer-x",
+      x.toFixed(3)
+    );
+
+    document.documentElement.style.setProperty(
+      "--pointer-y",
+      y.toFixed(3)
+    );
+
+    pointerFrame = null;
+  });
 }, { passive: true });
 
 // =====================================
-// RESIZE
+// SCREEN SIZE
 // =====================================
 
-window.addEventListener("resize", () => {
+function updateScreenSize() {
   document.documentElement.style.setProperty(
     "--screen-width",
     window.innerWidth + "px"
   );
-}, { passive: true });
+
+  document.documentElement.style.setProperty(
+    "--screen-height",
+    window.innerHeight + "px"
+  );
+}
+
+updateScreenSize();
+
+window.addEventListener("resize", updateScreenSize, {
+  passive: true
+});
+
+// =====================================
+// SAFETY
+// =====================================
+
+window.addEventListener("pageshow", () => {
+  if (loader) {
+    loader.classList.add("loaded");
+  }
+});
