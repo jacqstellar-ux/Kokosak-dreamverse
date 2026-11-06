@@ -769,3 +769,178 @@ a {
     scroll-behavior: auto !important;
   }
 }
+
+/* ==================================
+   KOKOSAK DREAMVERSE — 3D AVATAR
+================================== */
+
+.avatar-stage {
+  position: relative;
+  width: min(88vw, 440px);
+  height: 420px;
+  margin: 10px auto 25px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  isolation: isolate;
+  perspective: 1000px;
+  overflow: visible;
+}
+
+.avatar-stage-glow {
+  position: absolute;
+  width: 75%;
+  height: 75%;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgba(255, 143, 211, 0.55),
+    rgba(204, 155, 255, 0.25) 48%,
+    transparent 72%
+  );
+  filter: blur(24px);
+  animation: avatarGlow 4s ease-in-out infinite alternate;
+}
+
+.avatar-loading {
+  position: relative;
+  z-index: 2;
+  font-size: 65px;
+  color: #ff8acb;
+  text-shadow: 0 0 35px #ff8acb;
+  animation: loadingFloat 2s ease-in-out infinite;
+}
+
+@keyframes avatarGlow {
+  from {
+    transform: scale(.85);
+    opacity: .65;
+  }
+  to {
+    transform: scale(1.15);
+    opacity: 1;
+  }
+}
+
+@keyframes loadingFloat {
+  0%, 100% {
+    transform: translateY(0) rotate(-8deg);
+  }
+  50% {
+    transform: translateY(-14px) rotate(8deg);
+  }
+}
+
+/* Floating decorative sparkles */
+
+.avatar-sparkle {
+  position: absolute;
+  z-index: 5;
+  pointer-events: none;
+  color: white;
+  text-shadow: 0 0 15px #ff8acb;
+  animation: sparkleFloat 3s ease-in-out infinite;
+}
+
+.sparkle-one {
+  top: 12%;
+  left: 12%;
+  font-size: 32px;
+}
+
+.sparkle-two {
+  right: 8%;
+  top: 35%;
+  font-size: 35px;
+  animation-delay: .8s;
+}
+
+.sparkle-three {
+  left: 18%;
+  bottom: 15%;
+  font-size: 27px;
+  animation-delay: 1.4s;
+}
+
+.sparkle-four {
+  right: 17%;
+  bottom: 10%;
+  font-size: 24px;
+  animation-delay: .5s;
+}
+
+@keyframes sparkleFloat {
+  0%, 100% {
+    transform: translateY(0) rotate(0deg) scale(.8);
+    opacity: .55;
+  }
+  50% {
+    transform: translateY(-17px) rotate(25deg) scale(1.25);
+    opacity: 1;
+  }
+}
+
+/* Giant glossy username */
+
+#roblox-username {
+  position: relative;
+  z-index: 5;
+  font-family: 'Fredoka', sans-serif;
+  font-size: clamp(38px, 8vw, 76px);
+  font-weight: 700;
+  letter-spacing: -2px;
+  line-height: 1.1;
+  margin: 12px 0;
+  background: linear-gradient(
+    180deg,
+    #fffaff 0%,
+    #ffc4e8 28%,
+    #ff83c8 60%,
+    #d879ff 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(255,255,255,.65);
+  filter: drop-shadow(0 5px 0 #d96bb4)
+          drop-shadow(0 12px 20px rgba(210, 93, 184, .35));
+  animation: nameFloat 4s ease-in-out infinite;
+}
+
+@keyframes nameFloat {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-7px);
+  }
+}
+
+.roblox-hero {
+  position: relative;
+  z-index: 2;
+}
+
+.avatar-label,
+.username-label {
+  letter-spacing: 3px;
+  font-weight: 800;
+  text-shadow: 0 2px 12px rgba(255, 120, 200, .25);
+}
+
+@media (max-width: 600px) {
+  .avatar-stage {
+    width: 92vw;
+    height: 340px;
+    margin-top: 0;
+  }
+
+  #roblox-username {
+    font-size: clamp(34px, 9vw, 52px);
+    letter-spacing: -1px;
+  }
+
+  .avatar-sparkle {
+    font-size: 23px;
+  }
+}
