@@ -8,9 +8,9 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <meta name="theme-color" content="#ffe5f4">
+  <meta name="theme-color" content="#ffe4f4">
 
-  <title>KOKOSAK DREAMVERSE ♡</title>
+  <title>KOKOSAK DREAMVERSE ✦</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
 
@@ -20,75 +20,109 @@
 
   <link rel="stylesheet" href="style.css">
 
-  <script type="importmap">
-
-  {
-
-    "imports": {
-
-      "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js"
-
-    }
-
-  }
-
-  </script>
-
-  <script type="module" src="script.js"></script>
+  <script src="script.js" defer></script>
 
 </head>
 
 <body>
 
+  <!-- LOADING SCREEN -->
+
   <div id="loader">
 
-    <div class="loader-symbol">♡</div>
+    <div class="loader-heart">♡</div>
 
-    <div class="loader-title">KOKOSAK DREAMVERSE</div>
+    <h2>KOKOSAK DREAMVERSE</h2>
 
-    <div class="loader-bar"><span></span></div>
+    <div class="loader-track">
 
-    <p>MAKING SOMETHING MAGICAL...</p>
+      <div class="loader-progress"></div>
+
+    </div>
+
+    <p>preparing a little universe...</p>
 
   </div>
+
+  <!-- CINEMATIC TRANSITION -->
 
   <div id="transition-overlay">
 
-    <div class="portal-core">♡</div>
+    <div class="portal-cat">
 
-    <div class="portal-text">ENTERING HER WORLD...</div>
+      <div class="portal-ear left"></div>
+
+      <div class="portal-ear right"></div>
+
+      <div class="portal-face">
+
+        <span>♡</span>
+
+      </div>
+
+    </div>
+
+    <div class="portal-text">WELCOME TO HER WORLD</div>
 
   </div>
+
+  <!-- WORLD ONE -->
 
   <main id="app">
 
     <section id="entrance" class="world world-one">
 
-      <canvas id="dream-scene"></canvas>
+      <div class="sky-glow"></div>
 
-      <div class="ambient-glow glow-one"></div>
+      <div class="moon"></div>
 
-      <div class="ambient-glow glow-two"></div>
+      <div class="cloud cloud-one"></div>
 
-      <div class="floating-decor decor-one">✧</div>
+      <div class="cloud cloud-two"></div>
 
-      <div class="floating-decor decor-two">♡</div>
+      <div class="cloud cloud-three"></div>
 
-      <div class="floating-decor decor-three">୨୧</div>
+      <div class="floating-symbols">
 
-      <div class="floating-decor decor-four">✦</div>
+        <span>♡</span>
 
-      <nav class="topbar">
+        <span>✦</span>
 
-        <div class="brand">KOKOSAK <span>♡</span></div>
+        <span>୨୧</span>
 
-        <div class="topbar-caption">A WORLD MADE OF DREAMS</div>
+        <span>✧</span>
 
-      </nav>
+        <span>♡</span>
+
+        <span>⋆</span>
+
+        <span>✦</span>
+
+        <span>୨୧</span>
+
+      </div>
+
+      <header class="topbar">
+
+        <div class="brand">
+
+          <span class="brand-icon">♡</span>
+
+          KOKOSAK
+
+        </div>
+
+        <div class="topbar-tag">HER LITTLE UNIVERSE ✧</div>
+
+      </header>
 
       <div class="entrance-content">
 
-        <div class="tiny-label">✧ WELCOME TO A LITTLE MAGIC ✧</div>
+        <div class="eyebrow">
+
+          ✦ A PLACE MADE JUST FOR HER ✦
+
+        </div>
 
         <h1>
 
@@ -102,67 +136,137 @@
 
         <p class="entrance-description">
 
-          A little universe filled with magic,<br>
+          A tiny magical universe filled with cute surprises,
 
-          beautiful things and endless dreams.
+          fluffy friends and a little bit of magic.
 
         </p>
 
-        <button id="enter-world" class="world-button">
+        <div class="entrance-decoration">
 
-          <span>MY ROBLOX WORLD</span>
+          <span class="decoration-star">✦</span>
 
-          <span class="button-heart">♡</span>
+          <div class="mini-cat">
+
+            <div class="mini-ear left"></div>
+
+            <div class="mini-ear right"></div>
+
+            <div class="mini-face">
+
+              <span class="cat-eyes">•ᴗ•</span>
+
+              <span class="cat-mouth">♡</span>
+
+            </div>
+
+          </div>
+
+          <span class="decoration-star">✧</span>
+
+        </div>
+
+        <button id="enter-world" class="dream-button">
+
+          <span>ENTER HER WORLD</span>
+
+          <span class="button-arrow">↗</span>
 
         </button>
 
-        <div class="button-caption">✧ CLICK TO DISCOVER HER WORLD ✧</div>
+        <div class="entrance-hint">
+
+          <span>♡</span> tap to discover her universe <span>♡</span>
+
+        </div>
 
       </div>
 
-      <div class="bottom-note">
+      <div class="bottom-decoration">
 
-        <span>SCROLL A LITTLE · DREAM A LOT</span>
-
-        <span class="scroll-arrow">↓</span>
+        MADE WITH LOVE · KOKOSAK62783
 
       </div>
 
     </section>
 
+    <!-- WORLD TWO -->
+
     <section id="dreamverse" class="world world-two hidden">
 
-      <canvas id="roblox-scene"></canvas>
+      <div class="universe-background">
 
-      <div class="world-two-glow"></div>
+        <div class="universe-orb orb-one"></div>
 
-      <nav class="topbar second-topbar">
+        <div class="universe-orb orb-two"></div>
 
-        <div class="brand">KOKOSAK <span>♡</span></div>
+        <div class="universe-orb orb-three"></div>
 
-        <a href="https://www.roblox.com/users/4406875273/profile"
+        <div class="universe-stars"></div>
 
-           target="_blank" rel="noopener noreferrer">
+      </div>
+
+      <header class="universe-topbar">
+
+        <a href="#" class="universe-logo">♡ KOKOSAK WORLD</a>
+
+        <a
+
+          href="https://www.roblox.com/users/4406875273/profile"
+
+          target="_blank"
+
+          rel="noopener"
+
+          class="top-profile-link"
+
+        >
 
           ROBLOX PROFILE ↗
 
         </a>
 
-      </nav>
+      </header>
 
-      <div class="roblox-hero">
+      <div class="universe-content">
 
-        <div class="avatar-label">✧ THE GIRL OF THIS UNIVERSE ✧</div>
+        <div class="universe-heading">
 
-        <div class="avatar-aura">
+          <span class="little-label">✧ YOU MADE IT ✧</span>
 
-          <div class="avatar-orbit orbit-one"></div>
+          <h2>Her little<br><span>universe.</span></h2>
 
-          <div class="avatar-orbit orbit-two"></div>
+          <p>Everything here is a little more magical.</p>
+
+        </div>
+
+        <!-- AVATAR -->
+
+        <div class="avatar-stage">
+
+          <div class="avatar-orbit orbit-a"></div>
+
+          <div class="avatar-orbit orbit-b"></div>
+
+          <div class="avatar-orbit orbit-c"></div>
+
+          <div class="avatar-sparkles">
+
+            <span>✦</span>
+
+            <span>♡</span>
+
+            <span>✧</span>
+
+            <span>⋆</span>
+
+            <span>୨୧</span>
+
+          </div>
 
           <div class="real-avatar-card">
 
-            <div class="real-avatar-glow"></div>
+            <div class="avatar-top-label">THE MAIN CHARACTER ♡</div>
 
             <img
 
@@ -170,49 +274,169 @@
 
               src="https://tr.rbxcdn.com/30DAY-Avatar-BE89F67010AE072D05D9EFB251F18F9A-Png/720/720/Avatar/Png/noFilter"
 
-              alt="Kokosak62783 Roblox avatar"
+              alt="Kokosak Roblox avatar"
 
             >
 
-            <div class="avatar-card-shine"></div>
+            <div class="avatar-bottom-label">
+
+              <span>✧</span> KOKOSAK62783 <span>✧</span>
+
+            </div>
 
           </div>
 
-          <div class="avatar-sparkle sparkle-one">✦</div>
+        </div>
 
-          <div class="avatar-sparkle sparkle-two">♡</div>
+        <!-- CAT COMPANION -->
 
-          <div class="avatar-sparkle sparkle-three">✧</div>
+        <div class="cat-companion-section">
 
-          <div class="avatar-sparkle sparkle-four">୨୧</div>
+          <div class="section-kicker">YOUR LITTLE FRIEND</div>
+
+          <h3>Meet your new bestie ♡</h3>
+
+          <div class="companion-card">
+
+            <div class="companion-cat" id="companion-cat">
+
+              <div class="companion-shadow"></div>
+
+              <div class="companion-tail"></div>
+
+              <div class="companion-body"></div>
+
+              <div class="companion-head">
+
+                <div class="companion-ear ear-left"></div>
+
+                <div class="companion-ear ear-right"></div>
+
+                <div class="companion-blush blush-left"></div>
+
+                <div class="companion-blush blush-right"></div>
+
+                <div class="companion-eyes">
+
+                  <span>•</span><span>•</span>
+
+                </div>
+
+                <div class="companion-mouth">ᴗ</div>
+
+              </div>
+
+              <div class="companion-bow">♡</div>
+
+            </div>
+
+            <div class="companion-info">
+
+              <span class="friend-tag">YOUR MAGICAL PET</span>
+
+              <h4>Mochi</h4>
+
+              <p>A tiny fluffy friend who loves attention.</p>
+
+              <button id="pet-cat" class="pet-button">
+
+                PET MOCHI ♡
+
+              </button>
+
+              <div id="pet-message">Mochi is waiting for you...</div>
+
+            </div>
+
+          </div>
+
+          <div class="heart-counter">
+
+            <span>♡</span>
+
+            <strong id="heart-count">0</strong>
+
+            <small>love points collected</small>
+
+          </div>
 
         </div>
 
-        <div class="username-label">WELCOME TO HER UNIVERSE</div>
+        <!-- DISCOVER -->
 
-        <h2 id="roblox-username">Kokosak62783</h2>
+        <div class="discover-section">
 
-        <p class="profile-description">
+          <div class="section-kicker">EXPLORE HER WORLD</div>
 
-          One character. One universe. Endless magic.
+          <h3>Little magical things</h3>
 
-        </p>
+          <div class="discovery-grid">
 
-        <a class="profile-button"
+            <a
 
-           href="https://www.roblox.com/users/4406875273/profile"
+              class="discovery-card profile-card"
 
-           target="_blank" rel="noopener noreferrer">
+              href="https://www.roblox.com/users/4406875273/profile"
 
-          VISIT MY ROBLOX PROFILE ↗
+              target="_blank"
 
-        </a>
+              rel="noopener"
 
-      </div>
+            >
 
-      <div class="world-footer">
+              <span class="discovery-icon">🎀</span>
 
-        MADE WITH ♡ JUST FOR KOKOSAK
+              <strong>Her Roblox</strong>
+
+              <small>Visit her profile ↗</small>
+
+            </a>
+
+            <button class="discovery-card surprise-card" id="surprise-button">
+
+              <span class="discovery-icon">🎁</span>
+
+              <strong>Secret surprise</strong>
+
+              <small>Something special...</small>
+
+            </button>
+
+            <button class="discovery-card magic-card" id="magic-button">
+
+              <span class="discovery-icon">✨</span>
+
+              <strong>Magic moment</strong>
+
+              <small>Make some magic</small>
+
+            </button>
+
+            <div class="discovery-card dream-card">
+
+              <span class="discovery-icon">☁️</span>
+
+              <strong>Dreamland</strong>
+
+              <small>A world of dreams</small>
+
+            </div>
+
+          </div>
+
+        </div>
+
+        <div class="universe-footer">
+
+          <div class="footer-heart">♡</div>
+
+          <h3>Stay magical.</h3>
+
+          <p>This little universe belongs to you.</p>
+
+          <span>KOKOSAK DREAMVERSE · 2026</span>
+
+        </div>
 
       </div>
 
