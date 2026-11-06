@@ -602,3 +602,128 @@ a {
     scroll-behavior: auto !important;
   }
 }
+
+/* =====================================
+   DREAM PORTAL — CINEMATIC UPGRADE
+   ===================================== */
+
+#transition-overlay {
+  overflow: hidden;
+  isolation: isolate;
+  background:
+    radial-gradient(circle at center,
+      #ffffff 0%,
+      #ffe2f3 30%,
+      #f4c9ff 65%,
+      #d9c4ff 100%);
+}
+
+#transition-overlay::before {
+  content: "";
+  position: absolute;
+  width: min(85vw, 520px);
+  aspect-ratio: 1;
+  border: 3px solid rgba(255,255,255,.9);
+  border-radius: 50%;
+  box-shadow:
+    0 0 25px #ff9bd7,
+    0 0 70px #ff9bd7,
+    inset 0 0 35px #ffffff;
+  opacity: 0;
+  transform: scale(.05) rotate(-90deg);
+  z-index: -1;
+}
+
+#transition-overlay.active::before {
+  animation: portalOpen 1.3s cubic-bezier(.15,.8,.2,1) forwards;
+}
+
+#transition-overlay::after {
+  content: "✧  ♡  ✦  ୨୧  ✧  ♡  ✦";
+  position: absolute;
+  font-size: clamp(22px, 6vw, 42px);
+  letter-spacing: 12px;
+  color: white;
+  text-shadow: 0 0 20px #ff8acb;
+  opacity: 0;
+  transform: scale(.3);
+}
+
+#transition-overlay.active::after {
+  animation: portalSparkles 1.2s ease-out forwards;
+}
+
+.portal-core {
+  position: relative;
+  z-index: 2;
+  font-size: clamp(85px, 22vw, 145px);
+  color: white;
+  text-shadow:
+    0 0 15px #ff7ac7,
+    0 0 40px #ff8bd1,
+    0 0 90px #d9a5ff;
+  animation: portalHeart 1s ease-in-out infinite;
+}
+
+#transition-overlay.active .portal-core {
+  animation: portalHeart 1s ease-in-out infinite,
+             portalZoom 1.3s ease-in forwards;
+}
+
+.portal-text {
+  position: relative;
+  z-index: 2;
+  font-size: 11px;
+  letter-spacing: 4px;
+  color: #ad70a9;
+  animation: portalText 1s ease-in-out infinite alternate;
+}
+
+@keyframes portalOpen {
+  0% {
+    opacity: 0;
+    transform: scale(.05) rotate(-90deg);
+  }
+  40% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1.8) rotate(90deg);
+  }
+}
+
+@keyframes portalSparkles {
+  0% {
+    opacity: 0;
+    transform: scale(.3) rotate(-20deg);
+  }
+  35% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: scale(2.5) rotate(35deg);
+  }
+}
+
+@keyframes portalHeart {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.13);
+  }
+}
+
+@keyframes portalZoom {
+  to {
+    transform: scale(1.8);
+    opacity: 0;
+  }
+}
+
+@keyframes portalText {
+  from { opacity: .5; }
+  to { opacity: 1; }
+}
