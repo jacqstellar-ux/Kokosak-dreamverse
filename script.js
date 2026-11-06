@@ -79,7 +79,6 @@ function createWorld(canvasId, type) {
   scene.add(whiteLight);
 
   const objects = [];
-  const particles = [];
 
   // MATERIALS
 
@@ -133,6 +132,7 @@ function createWorld(canvasId, type) {
     group.scale.setScalar(scale);
 
     scene.add(group);
+
     objects.push({
       mesh: group,
       baseY: y,
@@ -153,7 +153,11 @@ function createWorld(canvasId, type) {
 
     for (let i = 0; i < 6; i++) {
       const cloudPart = new THREE.Mesh(
-        new THREE.SphereGeometry(0.65 + Math.random() * 0.35, 12, 12),
+        new THREE.SphereGeometry(
+          0.65 + Math.random() * 0.35,
+          12,
+          12
+        ),
         whiteMaterial
       );
 
@@ -227,7 +231,6 @@ function createWorld(canvasId, type) {
   // STAR PARTICLES
 
   const particleCount = 450;
-
   const positions = new Float32Array(particleCount * 3);
 
   for (let i = 0; i < particleCount; i++) {
@@ -237,6 +240,7 @@ function createWorld(canvasId, type) {
   }
 
   const particleGeometry = new THREE.BufferGeometry();
+
   particleGeometry.setAttribute(
     "position",
     new THREE.BufferAttribute(positions, 3)
@@ -266,7 +270,7 @@ function createWorld(canvasId, type) {
     currentY: 3
   };
 
-  const world = {
+  return {
     scene,
     camera,
     renderer,
@@ -277,8 +281,6 @@ function createWorld(canvasId, type) {
     pinkLight,
     purpleLight
   };
-
-  return world;
 }
 
 
@@ -315,7 +317,6 @@ function animate() {
   requestAnimationFrame(animate);
 
   const elapsed = clock.getElapsedTime();
-
   const world = activeWorld === 1 ? worldOne : worldTwo;
 
   if (!world) return;
@@ -406,28 +407,33 @@ enterButton?.addEventListener("click", () => {
 
 
 // =====================================
-// ROBLOX AVATAR
+// ROBLOX AVATAR — FIXED
 // =====================================
 
 async function loadRobloxAvatar() {
   const avatar = $("#roblox-avatar");
-
   if (!avatar) return;
+
+  const apiUrl =
+    "https://thumbnails.roblox.com/v1/users/avatar?userIds=4406875273&size=420x420&format=Png&isCircular=false";
 
   try {
     const response = await fetch(
-      "https://thumbnails.roblox.com/v1/users/avatar?userIds=4406875273&size=420x420&format=Png&isCircular=false"
+      "https://proxy.cors.dev/" + apiUrl
     );
 
-    if (!response.ok) throw new Error("Roblox API unavailable");
-
-    const data = await response.json();
-    const imageUrl = data.data?.[0]?.imageUrl;
-
-    if (imageUrl) {
-      avatar.src = imageUrl;
+    if (!response.ok) {
+      throw new Error(`Roblox API error: ${response.status}`);
     }
 
+    const data = await response.json();
+    const thumbnail = data.data?.[0];
+
+    if (thumbnail?.state === "Completed" && thumbnail.imageUrl) {
+      avatar.src = thumbnail.imageUrl;
+    } else {
+      throw new Error("Roblox avatar is not ready yet");
+    }
   } catch (error) {
     console.warn("Roblox avatar could not load:", error);
   }
