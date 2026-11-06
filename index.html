@@ -8,31 +8,31 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 
-  <meta name="theme-color" content="#fff0f8">
+  <meta name="theme-color" content="#ffe3f4">
 
-  <meta name="description" content="Enter Kokosak's dreamy little universe.">
+  <meta name="description" content="Enter Kokosak's Dreamverse.">
 
-  <title>KOKOSAK DREAMVERSE ✧</title>
+  <title>KOKOSAK DREAMVERSE ♡</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
 
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700;800;900&family=Pacifico&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="style.css">
 
   <script type="importmap">
 
-    {
+  {
 
-      "imports": {
+    "imports": {
 
-        "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js"
-
-      }
+      "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js"
 
     }
+
+  }
 
   </script>
 
@@ -44,117 +44,181 @@
 
   <div id="loader">
 
-    <div class="loader-star">✧</div>
+    <div class="loader-symbol">♡</div>
 
-    <p>PREPARING YOUR DREAMVERSE</p>
+    <div class="loader-title">KOKOSAK DREAMVERSE</div>
+
+    <div class="loader-bar"><span></span></div>
+
+    <p>MAKING SOMETHING MAGICAL...</p>
+
+  </div>
+
+  <div id="transition-overlay">
+
+    <div class="portal-core">♡</div>
+
+    <div class="portal-text">ENTERING HER WORLD...</div>
 
   </div>
 
   <main id="app">
 
-    <section id="entrance" class="screen">
+    <!-- WORLD ONE -->
 
-      <div class="entrance-glow"></div>
+    <section id="entrance" class="world world-one">
+
+      <canvas id="dream-scene"></canvas>
+
+      <div class="ambient-glow glow-one"></div>
+
+      <div class="ambient-glow glow-two"></div>
+
+      <div class="floating-decor decor-one">✧</div>
+
+      <div class="floating-decor decor-two">♡</div>
+
+      <div class="floating-decor decor-three">୨୧</div>
+
+      <div class="floating-decor decor-four">✦</div>
+
+      <nav class="topbar">
+
+        <div class="brand">KOKOSAK <span>♡</span></div>
+
+        <div class="topbar-caption">A WORLD MADE OF DREAMS</div>
+
+      </nav>
 
       <div class="entrance-content">
 
-        <span class="eyebrow">A LITTLE WORLD MADE FOR YOU</span>
+        <div class="tiny-label">✧ WELCOME TO A LITTLE MAGIC ✧</div>
 
-        <h1>KOKOSAK<span>♡</span></h1>
+        <h1>
 
-        <p>Somewhere between dreams and little paws...</p>
+          Welcome to<br>
 
-        <button id="enter-world">ENTER DREAMVERSE <span>✧</span></button>
+          <span>Kokosak's</span><br>
 
-        <div class="entrance-decoration">୨୧</div>
+          Dreamverse
+
+        </h1>
+
+        <p class="entrance-description">
+
+          A little universe filled with magic,<br>
+
+          beautiful things and endless dreams.
+
+        </p>
+
+        <button id="enter-world" class="world-button">
+
+          <span>MY ROBLOX WORLD</span>
+
+          <span class="button-heart">♡</span>
+
+        </button>
+
+        <div class="button-caption">✧ CLICK TO DISCOVER HER WORLD ✧</div>
+
+      </div>
+
+      <div class="bottom-note">
+
+        <span>SCROLL A LITTLE · DREAM A LOT</span>
+
+        <span class="scroll-arrow">↓</span>
 
       </div>
 
     </section>
 
-    <section id="dreamverse" class="screen hidden">
+    <!-- WORLD TWO -->
 
-      <header class="topbar">
+    <section id="dreamverse" class="world world-two hidden">
 
-        <a class="brand" href="#home">KOKOSAK <span>✧</span></a>
+      <canvas id="roblox-scene"></canvas>
 
-        <span class="topbar-label">YOUR LITTLE UNIVERSE</span>
+      <div class="world-two-glow"></div>
 
-        <button id="sound-toggle" aria-label="Toggle sound">♫</button>
+      <nav class="topbar second-topbar">
 
-      </header>
+        <div class="brand">KOKOSAK <span>♡</span></div>
 
-      <section id="home" class="hero">
+        <a href="https://www.roblox.com/users/4406875273/profile" target="_blank" rel="noopener noreferrer">
 
-        <div id="scene-wrap">
-
-          <canvas id="dream-scene"></canvas>
-
-        </div>
-
-        <div class="hero-copy">
-
-          <span class="eyebrow">WELCOME TO YOUR DREAM WORLD</span>
-
-          <h2>A world full<br>of little <span>magic.</span></h2>
-
-          <p>Floating islands, tiny paws and endless dreams.</p>
-
-          <a href="#cat-club" class="main-link">MEET THE CATS <span>→</span></a>
-
-        </div>
-
-        <div class="scroll-note">SCROLL TO EXPLORE ↓</div>
-
-      </section>
-
-      <section id="cat-club" class="content-section">
-
-        <span class="eyebrow">A VERY SPECIAL LITTLE FAMILY</span>
-
-        <h2>THE CAT CLUB <span>♡</span></h2>
-
-        <p>Every little soul has its own kind of magic.</p>
-
-        <div id="cat-collection" class="cat-collection"></div>
-
-      </section>
-
-      <section id="roblox" class="profile-section">
-
-        <span class="eyebrow">HER DIGITAL UNIVERSE</span>
-
-        <h2>THE GIRL BEHIND<br>THE DREAMS.</h2>
-
-        <p class="roblox-name">Kokosak62783</p>
-<div class="roblox-avatar-frame">
-
-  <img
-
-    id="roblox-avatar"
-
-    src="https://thumbnails.roblox.com/v1/users/avatar?userIds=4406875273&size=420x420&format=Png&isCircular=false"
-
-    alt="Kokosak Roblox Avatar"
-
-  >
-
-</div>
-        <a class="main-link" href="https://www.roblox.com/share?code=2c4ebfbb678e554689537595f9a2a528&type=Profile&source=ProfileShare&stamp=1793998951533" target="_blank" rel="noopener noreferrer">
-
-          VISIT ROBLOX PROFILE ↗
+          ROBLOX PROFILE ↗
 
         </a>
 
-      </section>
+      </nav>
 
-      <footer>
+      <div class="roblox-hero">
 
-        <span>MADE WITH ♡ FOR KOKOSAK</span>
+        <div class="avatar-label">✧ THE GIRL OF THIS UNIVERSE ✧</div>
 
-        <span>KOKOSAK DREAMVERSE © 2026</span>
+        <div class="avatar-aura">
 
-      </footer>
+          <div class="avatar-orbit orbit-one"></div>
+
+          <div class="avatar-orbit orbit-two"></div>
+
+          <div class="roblox-avatar-frame">
+
+            <img
+
+              id="roblox-avatar"
+
+              src=""
+
+              alt="Kokosak Roblox Avatar"
+
+            >
+
+          </div>
+
+          <div class="avatar-sparkle sparkle-one">✦</div>
+
+          <div class="avatar-sparkle sparkle-two">♡</div>
+
+          <div class="avatar-sparkle sparkle-three">✧</div>
+
+        </div>
+
+        <div class="username-label">THIS IS HER WORLD</div>
+
+        <h2 id="roblox-username">Kokosak62783</h2>
+
+        <p class="profile-description">
+
+          One character. One universe. Endless magic.
+
+        </p>
+
+        <a
+
+          class="profile-button"
+
+          href="https://www.roblox.com/users/4406875273/profile"
+
+          target="_blank"
+
+          rel="noopener noreferrer"
+
+        >
+
+          VISIT MY ROBLOX PROFILE ↗
+
+        </a>
+
+      </div>
+
+      <div class="world-footer">
+
+        MADE WITH ♡ JUST FOR KOKOSAK
+
+      </div>
 
     </section>
 
