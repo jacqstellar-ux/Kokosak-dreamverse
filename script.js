@@ -1,415 +1,416 @@
 
-import * as THREE from 'three';
+import * as THREE from "three";
 
-const loader = document.getElementById('loader');
-const entrance = document.getElementById('entrance');
-const dreamverse = document.getElementById('dreamverse');
-const enterButton = document.getElementById('enter-world');
+// =====================================
+// KOKOSAK DREAMVERSE
+// 3D WORLD ENGINE
+// =====================================
 
-const scene = new THREE.Scene();
-scene.background = new THREE.Color('#f9eafa');
-scene.fog = new THREE.Fog('#f9eafa', 13, 32);
+const $ = (selector) => document.querySelector(selector);
 
-const camera = new THREE.PerspectiveCamera(
-  38,
-  window.innerWidth / window.innerHeight,
-  0.1,
-  100
-);
-camera.position.set(0, 3.5, 12);
+const loader = $("#loader");
+const entrance = $("#entrance");
+const dreamverse = $("#dreamverse");
+const enterButton = $("#enter-world");
+const transition = $("#transition-overlay");
 
-const renderer = new THREE.WebGLRenderer({
-  canvas: document.getElementById('dream-scene'),
-  antialias: true,
-  alpha: true
-});
+let worldOne;
+let worldTwo;
+let activeWorld = 1;
+let transitionRunning = false;
 
-renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
-renderer.setSize(window.innerWidth, window.innerHeight);
-renderer.shadowMap.enabled = true;
-renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-renderer.outputColorSpace = THREE.SRGBColorSpace;
-renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.15;
+const clock = new THREE.Clock();
 
-scene.add(new THREE.HemisphereLight('#fff8ff', '#b99bcf', 2.1));
 
-const sun = new THREE.DirectionalLight('#ffffff', 3);
-sun.position.set(5, 9, 7);
-sun.castShadow = true;
-scene.add(sun);
+// =====================================
+// CREATE 3D WORLD
+// =====================================
 
-const pinkLight = new THREE.PointLight('#ff9bd5', 35, 18);
-pinkLight.position.set(-4, 3, 3);
-scene.add(pinkLight);
+function createWorld(canvasId, type) {
+  const canvas = document.getElementById(canvasId);
+  if (!canvas) return null;
 
-const lavenderLight = new THREE.PointLight('#bcaaff', 30, 18);
-lavenderLight.position.set(4, 2, -3);
-scene.add(lavenderLight);
+  const scene = new THREE.Scene();
 
-const world = new THREE.Group();
-scene.add(world);
+  const camera = new THREE.PerspectiveCamera(
+    48,
+    window.innerWidth / window.innerHeight,
+    0.1,
+    1000
+  );
 
-const mat = (color, roughness = 0.65, metalness = 0) =>
-  new THREE.MeshStandardMaterial({
-    color,
-    roughness,
-    metalness
+  camera.position.set(0, 3, 13);
+
+  let renderer;
+
+  try {
+    renderer = new THREE.WebGLRenderer({
+      canvas,
+      alpha: true,
+      antialias: true,
+      powerPreference: "low-power"
+    });
+  } catch (error) {
+    console.warn("3D graphics unavailable:", error);
+    return null;
+  }
+
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.outputColorSpace = THREE.SRGBColorSpace;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.25;
+
+  // LIGHTS
+
+  const ambient = new THREE.AmbientLight(0xffffff, 2.2);
+  scene.add(ambient);
+
+  const pinkLight = new THREE.PointLight(0xff8ecb, 120, 35);
+  pinkLight.position.set(-5, 5, 5);
+  scene.add(pinkLight);
+
+  const purpleLight = new THREE.PointLight(0xb59aff, 100, 35);
+  purpleLight.position.set(5, 3, -5);
+  scene.add(purpleLight);
+
+  const whiteLight = new THREE.DirectionalLight(0xffffff, 2);
+  whiteLight.position.set(2, 8, 5);
+  scene.add(whiteLight);
+
+  const objects = [];
+  const particles = [];
+
+  // MATERIALS
+
+  const pinkMaterial = new THREE.MeshStandardMaterial({
+    color: 0xffa9d9,
+    roughness: 0.3,
+    metalness: 0.05
   });
 
-const grassMat = mat('#a8d8c2');
-const pinkMat = mat('#ffb3dc');
-const lightPinkMat = mat('#ffe2f2');
-const purpleMat = mat('#c5b0f6');
-const whiteMat = mat('#fff9ff');
-const goldMat = mat('#f5d68c', 0.3, 0.6);
+  const purpleMaterial = new THREE.MeshStandardMaterial({
+    color: 0xc7aaff,
+    roughness: 0.32
+  });
 
-function addMesh(geometry, material, parent, x, y, z) {
-  const mesh = new THREE.Mesh(geometry, material);
-  mesh.position.set(x, y, z);
-  mesh.castShadow = true;
-  mesh.receiveShadow = true;
-  parent.add(mesh);
-  return mesh;
-}
+  const whiteMaterial = new THREE.MeshStandardMaterial({
+    color: 0xfff7ff,
+    roughness: 0.2
+  });
 
-// FLOATING ISLAND
-const island = new THREE.Group();
-world.add(island);
+  // FLOATING ISLANDS
 
-const top = addMesh(
-  new THREE.CylinderGeometry(3.5, 2.7, 0.8, 9, 1),
-  grassMat,
-  island,
-  0, -0.3, 0
-);
-top.rotation.y = 0.3;
+  function createIsland(x, y, z, scale) {
+    const group = new THREE.Group();
 
-const underside = addMesh(
-  new THREE.ConeGeometry(2.7, 2.5, 9),
-  mat('#a88acb'),
-  island,
-  0, -1.75, 0
-);
-underside.rotation.x = Math.PI;
-
-const islandRing = addMesh(
-  new THREE.TorusGeometry(3.15, 0.06, 12, 80),
-  goldMat,
-  island,
-  0, 0.05, 0
-);
-islandRing.rotation.x = Math.PI / 2;
-
-// TINY FLOWERS
-for (let i = 0; i < 28; i++) {
-  const angle = Math.random() * Math.PI * 2;
-  const radius = 1 + Math.random() * 2.5;
-  const x = Math.cos(angle) * radius;
-  const z = Math.sin(angle) * radius;
-
-  const flower = new THREE.Group();
-  flower.position.set(x, 0.16, z);
-  island.add(flower);
-
-  addMesh(
-    new THREE.SphereGeometry(0.055, 10, 8),
-    pinkMat,
-    flower, 0, 0, 0
-  );
-
-  for (let p = 0; p < 5; p++) {
-    const a = p * Math.PI * 2 / 5;
-    addMesh(
-      new THREE.SphereGeometry(0.07, 10, 8),
-      whiteMat,
-      flower,
-      Math.cos(a) * 0.1,
-      0,
-      Math.sin(a) * 0.1
+    const top = new THREE.Mesh(
+      new THREE.CylinderGeometry(2.1, 1.7, 0.55, 8),
+      pinkMaterial
     );
+
+    top.position.y = 0;
+    group.add(top);
+
+    const bottom = new THREE.Mesh(
+      new THREE.ConeGeometry(1.65, 2.2, 8),
+      purpleMaterial
+    );
+
+    bottom.position.y = -1.2;
+    bottom.rotation.y = Math.PI / 8;
+    group.add(bottom);
+
+    const crystal = new THREE.Mesh(
+      new THREE.OctahedronGeometry(0.42),
+      whiteMaterial
+    );
+
+    crystal.position.set(0.2, 0.7, 0.2);
+    group.add(crystal);
+
+    group.position.set(x, y, z);
+    group.scale.setScalar(scale);
+
+    scene.add(group);
+    objects.push({
+      mesh: group,
+      baseY: y,
+      speed: 0.5 + Math.random()
+    });
   }
-}
 
-// DREAM PALACE
-const palace = new THREE.Group();
-palace.position.set(-1.1, 0.1, -1.1);
-island.add(palace);
+  createIsland(-5, -3, -3, 1.2);
+  createIsland(5, -2, -5, 0.9);
+  createIsland(-7, 2, -9, 0.7);
+  createIsland(7, 3, -10, 0.8);
+  createIsland(0, -5, -9, 1.3);
 
-addMesh(
-  new THREE.BoxGeometry(1.55, 1.2, 1.3),
-  lightPinkMat,
-  palace, 0, 0.6, 0
-);
+  // DREAM CLOUDS
 
-addMesh(
-  new THREE.ConeGeometry(1.05, 1.35, 4),
-  purpleMat,
-  palace, 0, 1.85, 0
-).rotation.y = Math.PI / 4;
+  function createCloud(x, y, z, scale) {
+    const group = new THREE.Group();
 
-for (const x of [-0.48, 0.48]) {
-  addMesh(
-    new THREE.CylinderGeometry(0.16, 0.2, 1.7, 12),
-    whiteMat,
-    palace, x, 1.15, 0
-  );
+    for (let i = 0; i < 6; i++) {
+      const cloudPart = new THREE.Mesh(
+        new THREE.SphereGeometry(0.65 + Math.random() * 0.35, 12, 12),
+        whiteMaterial
+      );
 
-  addMesh(
-    new THREE.ConeGeometry(0.25, 0.5, 12),
-    pinkMat,
-    palace, x, 2.25, 0
-  );
-}
+      cloudPart.position.set(
+        (Math.random() - 0.5) * 2.2,
+        Math.random() * 0.5,
+        (Math.random() - 0.5) * 0.8
+      );
 
-const door = addMesh(
-  new THREE.BoxGeometry(0.35, 0.65, 0.06),
-  purpleMat,
-  palace, 0, 0.35, 0.67
-);
+      group.add(cloudPart);
+    }
 
-// CUSTOM 3D KITTEN
-const kitten = new THREE.Group();
-kitten.position.set(1.05, 0.2, 0.7);
-island.add(kitten);
+    group.position.set(x, y, z);
+    group.scale.setScalar(scale);
 
-const fur = mat('#fff1e9', 0.88);
-const innerEar = mat('#ffb0d3');
-const eyeMat = mat('#503347', 0.12);
-const noseMat = mat('#ee91b8');
-const shineMat = new THREE.MeshBasicMaterial({ color: '#ffffff' });
+    scene.add(group);
 
-const body = addMesh(
-  new THREE.SphereGeometry(0.43, 32, 24),
-  fur,
-  kitten, 0, 0.42, 0
-);
-body.scale.set(0.9, 1.05, 0.85);
+    objects.push({
+      mesh: group,
+      baseY: y,
+      speed: 0.25 + Math.random() * 0.3,
+      cloud: true
+    });
+  }
 
-const head = new THREE.Group();
-head.position.set(0, 1.05, 0.03);
-kitten.add(head);
+  createCloud(-5, 1, -2, 1.4);
+  createCloud(5, -1, -4, 1.1);
+  createCloud(0, 5, -8, 1.8);
+  createCloud(-8, -2, -8, 1);
+  createCloud(8, 2, -7, 1.2);
 
-addMesh(
-  new THREE.SphereGeometry(0.62, 40, 32),
-  fur,
-  head, 0, 0, 0
-);
+  // FLOATING HEARTS AND CRYSTALS
 
-for (const side of [-1, 1]) {
-  const ear = addMesh(
-    new THREE.ConeGeometry(0.23, 0.48, 32),
-    fur,
-    head, side * 0.39, 0.47, 0
-  );
-  ear.rotation.z = side * -0.22;
+  function createDecoration(x, y, z, type) {
+    let geometry;
 
-  const earInside = addMesh(
-    new THREE.SphereGeometry(0.12, 24, 16),
-    innerEar,
-    head, side * 0.39, 0.45, 0.15
-  );
-  earInside.scale.set(0.85, 1.35, 0.3);
+    if (type === "heart") {
+      geometry = new THREE.TorusGeometry(0.42, 0.12, 12, 32);
+    } else {
+      geometry = new THREE.OctahedronGeometry(0.35);
+    }
 
-  const eye = addMesh(
-    new THREE.SphereGeometry(0.105, 24, 20),
-    eyeMat,
-    head, side * 0.22, 0.03, 0.53
-  );
-  eye.scale.set(0.85, 1.15, 0.6);
+    const material = new THREE.MeshStandardMaterial({
+      color: type === "heart" ? 0xff8dc9 : 0xe4c8ff,
+      emissive: type === "heart" ? 0xff4fa9 : 0x9b6bff,
+      emissiveIntensity: 0.45,
+      roughness: 0.2
+    });
 
-  addMesh(
-    new THREE.SphereGeometry(0.033, 12, 12),
-    shineMat,
-    head, side * 0.22 - 0.025, 0.075, 0.59
-  );
+    const mesh = new THREE.Mesh(geometry, material);
+    mesh.position.set(x, y, z);
 
-  addMesh(
-    new THREE.SphereGeometry(0.035, 12, 12),
-    mat('#f6b3b9'),
-    head, side * 0.38, -0.17, 0.46
-  );
+    scene.add(mesh);
 
-  const paw = addMesh(
-    new THREE.SphereGeometry(0.19, 24, 16),
-    fur,
-    kitten, side * 0.29, 0.13, 0.25
-  );
-  paw.scale.set(0.8, 0.7, 1);
-}
+    objects.push({
+      mesh,
+      baseY: y,
+      speed: 0.8 + Math.random()
+    });
+  }
 
-addMesh(
-  new THREE.SphereGeometry(0.065, 20, 16),
-  noseMat,
-  head, 0, -0.12, 0.57
-);
-
-// LITTLE BOW
-const bow = new THREE.Group();
-bow.position.set(0, 0.52, 0.04);
-head.add(bow);
-
-const bowMat = mat('#ff83bd', 0.3);
-
-for (const side of [-1, 1]) {
-  const loop = addMesh(
-    new THREE.SphereGeometry(0.15, 20, 16),
-    bowMat,
-    bow, side * 0.14, 0, 0
-  );
-  loop.scale.set(1.2, 0.7, 0.4);
-}
-
-addMesh(
-  new THREE.SphereGeometry(0.075, 20, 16),
-  goldMat,
-  bow, 0, 0, 0.05
-);
-
-// CURLED TAIL
-const tailCurve = new THREE.CatmullRomCurve3([
-  new THREE.Vector3(0.3, 0.3, -0.2),
-  new THREE.Vector3(0.65, 0.2, -0.3),
-  new THREE.Vector3(0.75, 0.5, -0.4),
-  new THREE.Vector3(0.55, 0.7, -0.4)
-]);
-
-const tail = addMesh(
-  new THREE.TubeGeometry(tailCurve, 32, 0.105, 12, false),
-  fur,
-  kitten, 0, 0, 0
-);
-
-// CLOUDS
-const cloudMat = mat('#ffffff');
-
-for (let i = 0; i < 12; i++) {
-  const cloud = new THREE.Group();
-  cloud.position.set(
-    (Math.random() - 0.5) * 18,
-    -1 + Math.random() * 5,
-    -4 - Math.random() * 9
-  );
-
-  const size = 0.35 + Math.random() * 0.45;
-
-  for (let j = 0; j < 5; j++) {
-    const puff = addMesh(
-      new THREE.SphereGeometry(size * (0.65 + Math.random() * 0.4), 16, 12),
-      cloudMat,
-      cloud,
-      (j - 2) * size * 0.55,
-      Math.random() * size * 0.3,
-      0
+  for (let i = 0; i < 22; i++) {
+    createDecoration(
+      (Math.random() - 0.5) * 19,
+      (Math.random() - 0.5) * 12,
+      -Math.random() * 13,
+      i % 2 === 0 ? "heart" : "crystal"
     );
   }
 
-  scene.add(cloud);
-}
+  // STAR PARTICLES
 
-// FLOATING STARS
-const starGroup = new THREE.Group();
-scene.add(starGroup);
+  const particleCount = 450;
 
-for (let i = 0; i < 100; i++) {
-  const star = addMesh(
-    new THREE.SphereGeometry(0.025 + Math.random() * 0.035, 8, 8),
-    new THREE.MeshBasicMaterial({
-      color: Math.random() > 0.5 ? '#ffffff' : '#f6b5dc'
-    }),
-    starGroup,
-    (Math.random() - 0.5) * 24,
-    (Math.random() - 0.5) * 13,
-    -2 - Math.random() * 12
+  const positions = new Float32Array(particleCount * 3);
+
+  for (let i = 0; i < particleCount; i++) {
+    positions[i * 3] = (Math.random() - 0.5) * 28;
+    positions[i * 3 + 1] = (Math.random() - 0.5) * 18;
+    positions[i * 3 + 2] = -Math.random() * 20;
+  }
+
+  const particleGeometry = new THREE.BufferGeometry();
+  particleGeometry.setAttribute(
+    "position",
+    new THREE.BufferAttribute(positions, 3)
   );
+
+  const particleMaterial = new THREE.PointsMaterial({
+    color: type === 1 ? 0xffffff : 0xffa7dc,
+    size: 0.075,
+    transparent: true,
+    opacity: 0.85,
+    sizeAttenuation: true
+  });
+
+  const starField = new THREE.Points(
+    particleGeometry,
+    particleMaterial
+  );
+
+  scene.add(starField);
+
+  // CAMERA SETTINGS
+
+  const cameraData = {
+    targetX: 0,
+    targetY: 3,
+    currentX: 0,
+    currentY: 3
+  };
+
+  const world = {
+    scene,
+    camera,
+    renderer,
+    objects,
+    starField,
+    cameraData,
+    type,
+    pinkLight,
+    purpleLight
+  };
+
+  return world;
 }
 
-// ANIMATION
-const clock = new THREE.Clock();
+
+// =====================================
+// BUILD BOTH WORLDS
+// =====================================
+
+worldOne = createWorld("dream-scene", 1);
+worldTwo = createWorld("roblox-scene", 2);
+
+
+// =====================================
+// CAMERA MOVEMENT
+// =====================================
+
+window.addEventListener("pointermove", (event) => {
+  const x = (event.clientX / window.innerWidth - 0.5) * 2;
+  const y = (event.clientY / window.innerHeight - 0.5) * 2;
+
+  [worldOne, worldTwo].forEach((world) => {
+    if (!world) return;
+
+    world.cameraData.targetX = x * 1.2;
+    world.cameraData.targetY = 3 - y * 0.65;
+  });
+});
+
+
+// =====================================
+// ANIMATION LOOP
+// =====================================
 
 function animate() {
   requestAnimationFrame(animate);
 
-  const t = clock.getElapsedTime();
+  const elapsed = clock.getElapsedTime();
 
-  island.position.y = Math.sin(t * 0.7) * 0.13;
-  island.rotation.y = Math.sin(t * 0.18) * 0.12;
+  const world = activeWorld === 1 ? worldOne : worldTwo;
 
-  kitten.position.y = 0.2 + Math.sin(t * 1.8) * 0.07;
-  kitten.rotation.y = Math.sin(t * 0.65) * 0.16;
-  head.rotation.z = Math.sin(t * 1.3) * 0.035;
-  bow.rotation.z = Math.sin(t * 1.8) * 0.05;
-  tail.rotation.x = Math.sin(t * 2) * 0.1;
+  if (!world) return;
 
-  starGroup.rotation.y = t * 0.012;
+  world.objects.forEach((item, index) => {
+    const mesh = item.mesh;
 
-  renderer.render(scene, camera);
+    mesh.position.y =
+      item.baseY + Math.sin(elapsed * item.speed + index) * 0.22;
+
+    mesh.rotation.y += 0.0025 * item.speed;
+
+    if (!item.cloud) {
+      mesh.rotation.z += 0.0015;
+    }
+  });
+
+  world.starField.rotation.y = elapsed * 0.008;
+  world.starField.rotation.x = Math.sin(elapsed * 0.15) * 0.04;
+
+  const cam = world.cameraData;
+
+  cam.currentX += (cam.targetX - cam.currentX) * 0.025;
+  cam.currentY += (cam.targetY - cam.currentY) * 0.025;
+
+  world.camera.position.x =
+    Math.sin(elapsed * 0.18) * 0.4 + cam.currentX;
+
+  world.camera.position.y =
+    cam.currentY + Math.sin(elapsed * 0.3) * 0.15;
+
+  world.camera.position.z =
+    13 + Math.sin(elapsed * 0.2) * 0.5;
+
+  world.camera.lookAt(0, 0, -3);
+
+  world.pinkLight.position.x = Math.sin(elapsed * 0.5) * 5;
+  world.purpleLight.position.x = Math.cos(elapsed * 0.4) * 5;
+
+  world.renderer.render(world.scene, world.camera);
 }
 
 animate();
 
-// TOUCH PARALLAX
-let targetX = 0;
-let targetY = 0;
 
-window.addEventListener('pointermove', (event) => {
-  targetX = (event.clientX / window.innerWidth - 0.5) * 0.7;
-  targetY = (event.clientY / window.innerHeight - 0.5) * 0.35;
-});
+// =====================================
+// WORLD TRANSITION
+// =====================================
 
-function moveCamera() {
-  camera.position.x += (targetX - camera.position.x * 0.035) * 0.025;
-  camera.position.y += (3.5 - targetY - camera.position.y) * 0.025;
-  camera.lookAt(0, 0.2, 0);
-  requestAnimationFrame(moveCamera);
-}
-moveCamera();
+enterButton?.addEventListener("click", () => {
+  if (transitionRunning) return;
 
-// RESIZE
-window.addEventListener('resize', () => {
-  camera.aspect = window.innerWidth / window.innerHeight;
-  camera.updateProjectionMatrix();
-  renderer.setSize(window.innerWidth, window.innerHeight);
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
-});
+  transitionRunning = true;
 
-// ENTRANCE
-enterButton.addEventListener('click', () => {
-  entrance.classList.add('hidden');
-  dreamverse.classList.remove('hidden');
-  window.scrollTo(0, 0);
-  renderer.setSize(window.innerWidth, window.innerHeight);
-});
+  transition.classList.add("active");
 
-// CAT CLUB
-const cats = [
-  { name: 'Mochi', mood: 'The sweetest little dreamer', art: '♡' },
-  { name: 'Peachy', mood: 'A tiny ball of sunshine', art: '✧' },
-  { name: 'Luna', mood: 'The sleepy moon princess', art: '☾' }
-];
+  const core = $(".portal-core");
 
-const collection = document.getElementById('cat-collection');
+  if (core) {
+    core.style.transition = "transform 1s ease";
+    core.style.transform = "scale(12)";
+  }
 
-cats.forEach(cat => {
-  const card = document.createElement('article');
-  card.className = 'cat-card';
-  card.innerHTML = `
-    <div class="cat-art">${cat.art}</div>
-    <h3>${cat.name}</h3>
-    <p>${cat.mood}</p>
-  `;
-  collection.appendChild(card);
-});
-
-// LOADER
-window.addEventListener('load', () => {
   setTimeout(() => {
-    loader.style.opacity = '0';
-    setTimeout(() => loader.remove(), 900);
-  }, 500);
+    entrance.classList.add("hidden");
+    dreamverse.classList.remove("hidden");
+
+    activeWorld = 2;
+
+    if (worldTwo) {
+      worldTwo.camera.position.set(0, 3, 18);
+    }
+
+    loadRobloxAvatar();
+
+    setTimeout(() => {
+      transition.classList.remove("active");
+
+      if (core) {
+        core.style.transform = "scale(1)";
+      }
+
+      transitionRunning = false;
+    }, 500);
+
+  }, 1100);
 });
+
+
+// =====================================
+// ROBLOX AVATAR
+// =====================================
+
 async function loadRobloxAvatar() {
-  const avatar = document.getElementById("roblox-avatar");
+  const avatar = $("#roblox-avatar");
 
   if (!avatar) return;
 
@@ -418,14 +419,52 @@ async function loadRobloxAvatar() {
       "https://thumbnails.roblox.com/v1/users/avatar?userIds=4406875273&size=420x420&format=Png&isCircular=false"
     );
 
-    const data = await response.json();
+    if (!response.ok) throw new Error("Roblox API unavailable");
 
-    if (data.data && data.data[0]?.imageUrl) {
-      avatar.src = data.data[0].imageUrl;
+    const data = await response.json();
+    const imageUrl = data.data?.[0]?.imageUrl;
+
+    if (imageUrl) {
+      avatar.src = imageUrl;
     }
+
   } catch (error) {
-    console.error("Avatar could not load:", error);
+    console.warn("Roblox avatar could not load:", error);
   }
 }
 
-loadRobloxAvatar();
+
+// =====================================
+// INITIAL LOADING
+// =====================================
+
+window.addEventListener("load", () => {
+  setTimeout(() => {
+    loader?.classList.add("done");
+  }, 1300);
+});
+
+
+// =====================================
+// RESIZE
+// =====================================
+
+window.addEventListener("resize", () => {
+  [worldOne, worldTwo].forEach((world) => {
+    if (!world) return;
+
+    world.camera.aspect =
+      window.innerWidth / window.innerHeight;
+
+    world.camera.updateProjectionMatrix();
+
+    world.renderer.setSize(
+      window.innerWidth,
+      window.innerHeight
+    );
+
+    world.renderer.setPixelRatio(
+      Math.min(window.devicePixelRatio, 1.5)
+    );
+  });
+});
