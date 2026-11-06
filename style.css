@@ -1,5 +1,4 @@
-
-@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700;800;900&family=Pacifico&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700;800;900&display=swap');
 
 :root {
   --pink: #ff8fc9;
@@ -106,7 +105,7 @@ button {
   50% { transform: scale(1.18); }
 }
 
-/* PORTAL */
+/* PORTAL TRANSITION */
 
 #transition-overlay {
   position: fixed;
@@ -118,12 +117,14 @@ button {
   background: radial-gradient(circle, #fff 0%, #ffd6ef 35%, #b99aff 100%);
   opacity: 0;
   visibility: hidden;
+  pointer-events: none;
   transition: opacity .8s, visibility .8s;
 }
 
 #transition-overlay.active {
   opacity: 1;
   visibility: visible;
+  pointer-events: all;
 }
 
 .portal-content {
@@ -273,6 +274,10 @@ button {
   box-shadow: 0 18px 35px #d58acb80;
 }
 
+.magic-button:active {
+  transform: scale(.96);
+}
+
 .scroll-indicator {
   position: absolute;
   bottom: 30px;
@@ -331,6 +336,7 @@ button {
   letter-spacing: 1px;
   color: #fff;
   overflow-wrap: anywhere;
+  transform: rotateX(8deg);
   text-shadow:
     0 2px 0 #ffc2e3,
     0 4px 0 #f6a2d1,
@@ -339,7 +345,6 @@ button {
     0 10px 0 #b66a9f,
     0 15px 20px #b47abf80,
     0 0 30px #ffb4dc;
-  transform: rotateX(8deg);
 }
 
 .nickname-crown {
@@ -574,6 +579,47 @@ footer span {
   letter-spacing: 3px;
 }
 
+/* PORTAL CAT */
+
+.portal-cat {
+  position: relative;
+  width: 130px;
+  height: 115px;
+  margin: 0 auto 30px;
+  border-radius: 48% 48% 45% 45%;
+  background: linear-gradient(145deg, #fff, #ffd8ed);
+  box-shadow: 0 0 50px #ff8fca;
+}
+
+.portal-ear {
+  position: absolute;
+  top: -23px;
+  width: 55px;
+  height: 55px;
+  background: #ffd8ed;
+  transform: rotate(45deg);
+  border-radius: 12px;
+}
+
+.portal-ear.left { left: 4px; }
+.portal-ear.right { right: 4px; }
+
+.portal-face {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: #ff8fc9;
+  font-size: 55px;
+}
+
+.portal-text {
+  color: white;
+  font: 700 20px 'Fredoka', sans-serif;
+  letter-spacing: 3px;
+  text-shadow: 0 3px 15px #a77bc6;
+}
+
 /* RESPONSIVE */
 
 @media (max-width: 600px) {
@@ -602,6 +648,7 @@ footer span {
   }
 
   .nickname-main {
+    font-size: clamp(25px, 8vw, 48px);
     letter-spacing: 0;
   }
 
