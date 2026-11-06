@@ -1,21 +1,22 @@
+
 /* ==========================================
-   KOKOSAK DREAMVERSE
-   CAT UNIVERSE EXPERIENCE
+   KOKOSAK DREAMVERSE — FIXED VERSION
 ========================================== */
 
-const loader = document.getElementById("loader");
-const entrance = document.getElementById("entrance");
-const dreamverse = document.getElementById("dreamverse");
-const enterButton = document.getElementById("enter-world");
-const transition = document.getElementById("transition-overlay");
+const $ = (id) => document.getElementById(id);
 
-const petButton = document.getElementById("pet-cat");
-const cat = document.getElementById("companion-cat");
-const petMessage = document.getElementById("pet-message");
-const heartCount = document.getElementById("heart-count");
+const loader = $("loader");
+const entrance = $("entrance");
+const dreamverse = $("dreamverse");
+const enterButton = $("enter-world");
+const transition = $("transition-overlay");
 
-const surpriseButton = document.getElementById("surprise-button");
-const magicButton = document.getElementById("magic-button");
+const petButton = $("pet-cat");
+const cat = $("companion-cat");
+const petMessage = $("pet-message");
+const heartCount = $("heart-count");
+const surpriseButton = $("surprise-button");
+const magicButton = $("magic-button");
 
 let entered = false;
 let lovePoints = 0;
@@ -28,248 +29,163 @@ function hideLoader() {
 }
 
 window.addEventListener("load", hideLoader);
-setTimeout(hideLoader, 1600);
+setTimeout(hideLoader, 1800);
 
-/* PARTICLE ENGINE */
+/* PARTICLES */
 
-function createParticle(x, y, symbol, color, size = 24) {
-  const particle = document.createElement("div");
-
-  particle.textContent = symbol;
-
-  Object.assign(particle.style, {
-    position: "fixed",
-    left: x + "px",
-    top: y + "px",
-    zIndex: "10001",
-    pointerEvents: "none",
-    color: color,
-    fontSize: size + "px",
-    textShadow: "0 0 15px " + color,
-    transform: "translate(-50%, -50%)",
-    willChange: "transform, opacity"
-  });
-
-  document.body.appendChild(particle);
-
-  const destinationX = (Math.random() - 0.5) * 260;
-  const destinationY = -80 - Math.random() * 260;
-  const rotation = (Math.random() - 0.5) * 180;
-
-  const animation = particle.animate(
-    [
-      {
-        opacity: 0,
-        transform: "translate(-50%, -50%) scale(.2) rotate(0deg)"
-      },
-      {
-        opacity: 1,
-        offset: .2,
-        transform: "translate(-50%, -50%) scale(1.3) rotate(20deg)"
-      },
-      {
-        opacity: 0,
-        transform:
-          `translate(calc(-50% + ${destinationX}px), calc(-50% + ${destinationY}px)) scale(.2) rotate(${rotation}deg)`
-      }
-    ],
-    {
-      duration: 1000 + Math.random() * 1000,
-      easing: "cubic-bezier(.15,.7,.3,1)"
-    }
-  );
-
-  animation.onfinish = () => particle.remove();
-}
-
-function burst(x, y, amount = 20) {
+function burst(x, y, amount = 18) {
   const symbols = ["♡", "✦", "✧", "🐾", "⋆"];
   const colors = ["#ff83c5", "#c09cff", "#ffffff", "#ffb5dc"];
 
   for (let i = 0; i < amount; i++) {
-    createParticle(
-      x,
-      y,
-      symbols[Math.floor(Math.random() * symbols.length)],
-      colors[Math.floor(Math.random() * colors.length)],
-      14 + Math.random() * 22
-    );
-  }
-}
+    const particle = document.createElement("div");
 
-/* CAT PAW PORTAL */
+    particle.textContent =
+      symbols[Math.floor(Math.random() * symbols.length)];
 
-function createPortal() {
-  if (!transition) return;
-
-  transition.innerHTML = "";
-
-  const portal = document.createElement("div");
-  portal.className = "portal-cat";
-
-  portal.innerHTML = `
-    <div class="portal-ear left"></div>
-    <div class="portal-ear right"></div>
-    <div class="portal-face"><span>♡</span></div>
-  `;
-
-  const label = document.createElement("div");
-  label.className = "portal-text";
-  label.textContent = "WELCOME TO HER WORLD";
-
-  const paw = document.createElement("div");
-  paw.textContent = "🐾";
-
-  Object.assign(paw.style, {
-    position: "absolute",
-    fontSize: "100px",
-    opacity: "0",
-    filter: "drop-shadow(0 0 25px #ff8dce)",
-    zIndex: "4"
-  });
-
-  transition.append(portal, label, paw);
-
-  const symbols = ["♡", "✦", "୨୧", "✧", "🐾", "⋆"];
-
-  for (let i = 0; i < 45; i++) {
-    const sparkle = document.createElement("span");
-    sparkle.textContent = symbols[i % symbols.length];
-
-    Object.assign(sparkle.style, {
-      position: "absolute",
-      left: Math.random() * 100 + "%",
-      top: Math.random() * 100 + "%",
-      color: "white",
-      fontSize: 15 + Math.random() * 30 + "px",
-      opacity: "0",
+    Object.assign(particle.style, {
+      position: "fixed",
+      left: x + "px",
+      top: y + "px",
+      zIndex: "10001",
       pointerEvents: "none",
-      textShadow: "0 0 15px #ff70c6"
+      color: colors[Math.floor(Math.random() * colors.length)],
+      fontSize: 16 + Math.random() * 22 + "px",
+      textShadow: "0 0 15px #ff83c5"
     });
 
-    transition.appendChild(sparkle);
-  }
+    document.body.appendChild(particle);
 
-  return { portal, label, paw };
+    const animation = particle.animate(
+      [
+        { opacity: 0, transform: "translate(0,0) scale(.2)" },
+        { opacity: 1, offset: .2 },
+        {
+          opacity: 0,
+          transform:
+            `translate(${(Math.random() - .5) * 220}px,${-100 - Math.random() * 200}px) scale(.3) rotate(100deg)`
+        }
+      ],
+      {
+        duration: 1000 + Math.random() * 700,
+        easing: "ease-out"
+      }
+    );
+
+    animation.onfinish = () => particle.remove();
+  }
 }
+
+/* PORTAL */
 
 function playPortal() {
   if (!transition) return;
 
-  const elements = createPortal();
-  const { portal, label, paw } = elements;
+  transition.innerHTML = `
+    <div class="portal-cat">
+      <div class="portal-ear left"></div>
+      <div class="portal-ear right"></div>
+      <div class="portal-face"><span>♡</span></div>
+    </div>
+    <div class="portal-text">WELCOME TO HER WORLD</div>
+  `;
 
   transition.style.visibility = "visible";
   transition.style.pointerEvents = "all";
+  transition.style.opacity = "1";
 
-  transition.animate(
-    [
-      { opacity: 0 },
-      { opacity: 1, offset: .15 },
-      { opacity: 1 }
-    ],
-    { duration: 450, fill: "forwards" }
-  );
+  const portal = transition.querySelector(".portal-cat");
+  const label = transition.querySelector(".portal-text");
 
-  portal.animate(
-    [
-      { transform: "scale(.05) rotate(-90deg)", opacity: 0 },
-      { transform: "scale(.8) rotate(0deg)", opacity: 1, offset: .45 },
-      { transform: "scale(1.25) rotate(8deg)", opacity: 1 },
-      { transform: "scale(8) rotate(25deg)", opacity: 0 }
-    ],
-    {
-      duration: 1900,
-      fill: "forwards",
-      easing: "cubic-bezier(.16,.8,.2,1)"
-    }
-  );
-
-  label.animate(
-    [
-      { opacity: 0, transform: "translateY(20px)" },
-      { opacity: 1, transform: "translateY(0)", offset: .4 },
-      { opacity: 0, transform: "translateY(-15px)" }
-    ],
-    { duration: 1700, fill: "forwards" }
-  );
-
-  paw.animate(
-    [
-      { opacity: 0, transform: "translate(100vw, 100vh) rotate(-60deg) scale(.2)" },
-      { opacity: 1, offset: .25, transform: "translate(0, 0) rotate(0deg) scale(1.3)" },
-      { opacity: 0, transform: "translate(-100vw, -100vh) rotate(60deg) scale(2)" }
-    ],
-    {
-      duration: 1500,
-      delay: 250,
-      fill: "forwards",
-      easing: "ease-in-out"
-    }
-  );
-
-  transition.querySelectorAll("span").forEach((sparkle, index) => {
-    sparkle.animate(
+  if (portal) {
+    portal.animate(
       [
-        { opacity: 0, transform: "scale(.2) rotate(0deg)" },
-        { opacity: 1, transform: "scale(1.5) rotate(90deg)", offset: .5 },
-        { opacity: 0, transform: "scale(.1) rotate(180deg)" }
+        { transform: "scale(.05) rotate(-90deg)", opacity: 0 },
+        { transform: "scale(1.1) rotate(0deg)", opacity: 1, offset: .4 },
+        { transform: "scale(8) rotate(25deg)", opacity: 0 }
       ],
       {
-        duration: 1200 + Math.random() * 1000,
-        delay: index * 15,
-        fill: "forwards"
+        duration: 1400,
+        fill: "forwards",
+        easing: "cubic-bezier(.16,.8,.2,1)"
       }
     );
-  });
+  }
+
+  if (label) {
+    label.animate(
+      [
+        { opacity: 0, transform: "translateY(20px)" },
+        { opacity: 1, transform: "translateY(0)", offset: .35 },
+        { opacity: 0, transform: "translateY(-15px)" }
+      ],
+      { duration: 1300, fill: "forwards" }
+    );
+  }
+
+  for (let i = 0; i < 25; i++) {
+    setTimeout(() => {
+      burst(
+        Math.random() * window.innerWidth,
+        Math.random() * window.innerHeight,
+        2
+      );
+    }, i * 35);
+  }
 }
 
-/* ENTER THE SECOND WORLD */
+/* ENTER DREAMVERSE */
+
+function enterDreamverse() {
+  if (entered || !entrance || !dreamverse) return;
+
+  entered = true;
+
+  if (enterButton) enterButton.disabled = true;
+
+  playPortal();
+
+  setTimeout(() => {
+    entrance.classList.add("hidden");
+    entrance.style.display = "none";
+
+    dreamverse.classList.remove("hidden");
+    dreamverse.style.display = "block";
+    dreamverse.style.visibility = "visible";
+    dreamverse.style.opacity = "1";
+    dreamverse.style.transform = "none";
+
+    if (transition) {
+      transition.style.animation = "none";
+      transition.style.opacity = "0";
+      transition.style.visibility = "hidden";
+      transition.style.pointerEvents = "none";
+      transition.innerHTML = "";
+    }
+
+    window.scrollTo(0, 0);
+
+    dreamverse.animate(
+      [
+        { opacity: 0, transform: "scale(1.04)" },
+        { opacity: 1, transform: "scale(1)" }
+      ],
+      {
+        duration: 1000,
+        easing: "ease-out"
+      }
+    );
+
+    burst(window.innerWidth / 2, window.innerHeight / 2, 35);
+
+  }, 1500);
+}
 
 if (enterButton) {
-  enterButton.addEventListener("click", () => {
-    if (entered) return;
-
-    entered = true;
-    enterButton.disabled = true;
-
-    playPortal();
-
-    setTimeout(() => {
-      entrance.classList.add("hidden");
-      dreamverse.classList.remove("hidden");
-
-      window.scrollTo({ top: 0, behavior: "instant" });
-
-      dreamverse.animate(
-        [
-          { opacity: 0, transform: "scale(1.08)" },
-          { opacity: 1, transform: "scale(1)" }
-        ],
-        {
-          duration: 1100,
-          easing: "cubic-bezier(.16,.8,.2,1)"
-        }
-      );
-
-      setTimeout(() => {
-        transition.animate(
-          [{ opacity: 1 }, { opacity: 0 }],
-          { duration: 850, fill: "forwards" }
-        );
-
-        setTimeout(() => {
-          transition.style.visibility = "hidden";
-          transition.style.pointerEvents = "none";
-        }, 900);
-
-      }, 400);
-
-    }, 1450);
-  });
+  enterButton.addEventListener("click", enterDreamverse);
 }
 
-/* MOCHI - PET THE CAT */
+/* MOCHI */
 
 function petMochi() {
   if (!cat) return;
@@ -277,9 +193,7 @@ function petMochi() {
   petCount++;
   lovePoints += 5;
 
-  if (heartCount) {
-    heartCount.textContent = lovePoints;
-  }
+  if (heartCount) heartCount.textContent = lovePoints;
 
   const messages = [
     "Mochi loves you!! ♡",
@@ -303,39 +217,22 @@ function petMochi() {
       { transform: "scale(.92) rotate(8deg)", offset: .65 },
       { transform: "scale(1) rotate(0deg)" }
     ],
-    {
-      duration: 550,
-      easing: "ease-out"
-    }
+    { duration: 550, easing: "ease-out" }
   );
 
   const rect = cat.getBoundingClientRect();
+  burst(rect.left + rect.width / 2, rect.top + rect.height / 2, 12);
 
-  burst(
-    rect.left + rect.width / 2,
-    rect.top + rect.height / 2,
-    12
-  );
-
-  if (petCount % 5 === 0 && petMessage) {
-    petMessage.textContent = "Mochi gave you a BIG kiss! 💗 +25";
+  if (petCount % 5 === 0) {
     lovePoints += 25;
-    heartCount.textContent = lovePoints;
-    burst(
-      window.innerWidth / 2,
-      window.innerHeight / 2,
-      35
-    );
+    if (heartCount) heartCount.textContent = lovePoints;
+    if (petMessage) petMessage.textContent = "Mochi gave you a BIG kiss! 💗 +25";
+    burst(window.innerWidth / 2, window.innerHeight / 2, 35);
   }
 }
 
-if (petButton) {
-  petButton.addEventListener("click", petMochi);
-}
-
-if (cat) {
-  cat.addEventListener("click", petMochi);
-}
+if (petButton) petButton.addEventListener("click", petMochi);
+if (cat) cat.addEventListener("click", petMochi);
 
 /* SECRET SURPRISE */
 
@@ -363,7 +260,6 @@ function openSurprise() {
       border-radius:30px;
       background:linear-gradient(145deg,#fff7fc,#f1e3ff);
       box-shadow:0 20px 80px #704b8b55;
-      animation:surprisePop .5s cubic-bezier(.2,1.5,.4,1);
     ">
       <div style="font-size:65px">🎀</div>
       <h2 style="font:700 30px Fredoka;color:#a67bbd;margin:15px 0">
@@ -375,40 +271,22 @@ function openSurprise() {
       </p>
       <div style="font-size:30px;margin:20px">🐱 💗 ✨</div>
       <button id="close-surprise" style="
-        border:0;
-        border-radius:30px;
-        padding:13px 25px;
-        color:white;
-        background:linear-gradient(100deg,#ff95ca,#b69aff);
+        border:0;border-radius:30px;padding:13px 25px;
+        color:white;background:linear-gradient(100deg,#ff95ca,#b69aff);
         font-weight:900;
-        letter-spacing:1px;
       ">AWWW ♡</button>
     </div>
   `;
 
   document.body.appendChild(modal);
 
-  const style = document.createElement("style");
-  style.textContent = `
-    @keyframes surprisePop {
-      from { transform:scale(.5) rotate(-8deg); opacity:0; }
-      to { transform:scale(1) rotate(0); opacity:1; }
-    }
-  `;
-
-  document.head.appendChild(style);
-
   modal.querySelector("#close-surprise").addEventListener("click", () => {
     burst(window.innerWidth / 2, window.innerHeight / 2, 25);
     modal.remove();
-    style.remove();
   });
 
   modal.addEventListener("click", (event) => {
-    if (event.target === modal) {
-      modal.remove();
-      style.remove();
-    }
+    if (event.target === modal) modal.remove();
   });
 }
 
@@ -420,11 +298,7 @@ if (surpriseButton) {
 
 if (magicButton) {
   magicButton.addEventListener("click", () => {
-    burst(
-      window.innerWidth / 2,
-      window.innerHeight / 2,
-      55
-    );
+    burst(window.innerWidth / 2, window.innerHeight / 2, 55);
 
     magicButton.animate(
       [
@@ -438,7 +312,7 @@ if (magicButton) {
   });
 }
 
-/* BACKGROUND TOUCH MAGIC */
+/* TOUCH MAGIC */
 
 document.addEventListener("pointerdown", (event) => {
   if (!dreamverse || dreamverse.classList.contains("hidden")) return;
@@ -463,8 +337,7 @@ if (avatarCard) {
     const x = (event.clientX / window.innerWidth - .5) * 10;
     const y = (event.clientY / window.innerHeight - .5) * -10;
 
-    avatarCard.style.transform =
-      `rotateY(${x}deg) rotateX(${y}deg)`;
+    avatarCard.style.transform = `rotateY(${x}deg) rotateX(${y}deg)`;
   }, { passive: true });
 
   window.addEventListener("pointerleave", () => {
@@ -472,6 +345,4 @@ if (avatarCard) {
   });
 }
 
-/* FINISH */
-
-console.log("KOKOSAK DREAMVERSE — CAT UNIVERSE READY 🐾");
+console.log("KOKOSAK DREAMVERSE — FIXED 🐾");
