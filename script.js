@@ -408,3 +408,24 @@ window.addEventListener('load', () => {
     setTimeout(() => loader.remove(), 900);
   }, 500);
 });
+async function loadRobloxAvatar() {
+  const avatar = document.getElementById("roblox-avatar");
+
+  if (!avatar) return;
+
+  try {
+    const response = await fetch(
+      "https://thumbnails.roblox.com/v1/users/avatar?userIds=4406875273&size=420x420&format=Png&isCircular=false"
+    );
+
+    const data = await response.json();
+
+    if (data.data && data.data[0]?.imageUrl) {
+      avatar.src = data.data[0].imageUrl;
+    }
+  } catch (error) {
+    console.error("Avatar could not load:", error);
+  }
+}
+
+loadRobloxAvatar();
